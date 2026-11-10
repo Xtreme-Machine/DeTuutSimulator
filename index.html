@@ -1,0 +1,713 @@
+<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stoomgemaal de Tuut Simulator</title><style>
+:root{font-family:Arial,Helvetica,sans-serif;background:#080808;color:#f4f4f4}*{box-sizing:border-box}body{margin:0}.stripe{height:12px;background:linear-gradient(90deg,#9f3513 0 11%,#ec560d 11% 22%,#f7a577 22% 33%,#995d16 33% 44%,#f4950a 44% 55%,#fbc676 55% 66%,#005567 66% 77%,#087f9d 77% 88%,#64b5c9 88%)}header{background:#222;color:#fff;padding:24px max(18px,4vw);display:flex;align-items:center;gap:28px;flex-wrap:wrap}.logo{font-size:27px;font-weight:900;letter-spacing:-1px;line-height:.9;border-left:5px solid white;padding-left:13px}.logo small{display:block;font-size:10px;letter-spacing:3px;margin-top:8px}.heading h1{font-size:clamp(21px,3vw,35px);margin:0;color:#f39312;font-weight:900;letter-spacing:.2px}.heading p{margin:6px 0 0;color:#ddd;font-size:13px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 265px;gap:16px;padding:16px;max-width:1700px;margin:auto}.stage{position:relative;background:#101719;border:2px solid #146b80;border-radius:4px;overflow:hidden}.stage svg{width:100%;display:block;touch-action:none}.sidebar{background:#222;color:#f4f4f4;padding:15px;border-top:7px solid #f39211}.sidebar h2{font-size:19px;color:#ff9b18;margin:8px 0 12px}.parts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.part{border:2px solid #555;background:#353535;color:white;min-height:120px;padding:8px 4px;cursor:grab;touch-action:none;text-align:center;user-select:none}.part svg{width:95px;height:54px;pointer-events:none}.part strong{display:block;font-size:12px}.part small{display:block;font-size:10px;color:#d1d1d1;margin-top:4px}.part.active{border-color:#ff9b18;background:#694516}.part.placed{border-color:#5dbb8c;opacity:.65}.btn{background:#333;border:1px solid #888;color:white;padding:9px 6px;cursor:pointer;text-align:center;font-size:12px}.btn.on{background:#0a7082}.btn:disabled{opacity:.45}.controls{display:grid;grid-template-columns:1fr 1fr;gap:6px}.meters{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:14px 0}.meter{background:#333;padding:9px}.meter span{font-size:11px;color:#ddd;display:block}.meter b{font-size:19px;color:#ffc16c}.hint{font-size:12px;line-height:1.5;color:#dedede}.goal{color:#ffb23c;font-weight:bold}.log{background:#111;color:#ddd;height:105px;overflow:auto;font-size:12px;padding:8px;line-height:1.6}.legend{font-size:12px;padding:10px 4px;line-height:1.6}.slot{cursor:pointer}.slot polygon{fill:#9ba9a4;fill-opacity:.55;stroke:#4b6569;stroke-width:2;stroke-dasharray:7 5}.slot text{font-size:13px;fill:#f6f1dc;font-weight:bold;pointer-events:none}.slot.target polygon{stroke:#10a354;stroke-width:5}.slot.wrong polygon{stroke:#dc3c27;stroke-width:5}.machine text{font-size:11px;paint-order:stroke;stroke:#f7f1df;stroke-width:5px;stroke-linejoin:round;font-size:12px;fill:#192e34;font-weight:bold;text-anchor:middle;pointer-events:none}.pipe{fill:none;stroke-width:8;stroke-linecap:round;stroke-linejoin:round}.steam{stroke:#9853bf}.hot{stroke:#e54a31}.exhaust{stroke:#e69b9b}.water{stroke:#178ac3}.drive{stroke:#865128}.flow{fill:none;stroke-width:5;stroke-dasharray:12 14;animation:move 11s linear infinite;pointer-events:none;opacity:0;transition:opacity .35s}.flow.running{opacity:1}@keyframes move{from{stroke-dashoffset:0}to{stroke-dashoffset:-260}}.ghost svg{display:block;margin:auto;filter:drop-shadow(0 2px 2px #0006)}.ghost{position:fixed;pointer-events:none;z-index:9999;background:#f39312;color:#222;padding:12px;border:2px solid #fff;box-shadow:0 6px 20px #0007;font-weight:bold}.status{background:#202020;color:#fff;padding:8px 13px;border-left:7px solid #f39211;font-size:13px}@media(max-width:900px){.layout{grid-template-columns:1fr}.parts{grid-template-columns:repeat(3,1fr)}}@media(max-width:550px){header{padding:17px}.parts{grid-template-columns:repeat(2,1fr)}.layout{padding:7px}.sidebar{padding:10px}}
+
+.bundle{grid-column:1/-1;background:#343434;border:2px solid #f39312;padding:11px 8px;font-size:14px;font-weight:800;color:#fff;cursor:pointer;text-align:left}.bundle:disabled{opacity:.5;border-color:#518c70}.bundle small{display:block;color:#e2c49e;font-size:11px;margin-top:4px;font-weight:400}.alarm{display:none;background:#b40000;color:#fff;padding:13px;border:5px solid #ffeb39;font-weight:900;font-size:19px;text-align:center;animation:alarmflash .65s infinite alternate}.alarm.active{display:block}@keyframes alarmflash{from{background:#ff1717;box-shadow:0 0 12px #ff0000}to{background:#520000;box-shadow:0 0 30px #ff3300}}.gameover{display:none;position:fixed;inset:0;background:#190000e8;z-index:10000;align-items:center;justify-content:center;padding:25px}.gameover.active{display:flex}.gameover-inner{max-width:510px;background:#222;color:white;border:7px solid #e94420;padding:30px;text-align:center;box-shadow:0 0 100px #f30}.gameover h2{font-size:35px;color:#ff9b18}.gameover button{padding:15px 25px;font-size:20px;background:#f39312;color:#111;border:0;font-weight:900;cursor:pointer}.whistle{filter:drop-shadow(0 0 5px #ffbb30)}
+
+/* Dashboard in de rechterbovenhoek van het diagram */
+.dashboard{position:absolute;right:12px;top:12px;width:min(310px,38%);z-index:4;background:rgba(29,30,31,.97);color:#fff;border-top:7px solid #f39312;padding:12px;box-shadow:0 5px 24px #0005;border-radius:3px;max-height:calc(100% - 24px);overflow:auto}
+.dashboard h2{font-size:17px;color:#ffa51c;margin:0 0 8px}.dashboard .meters{margin:8px 0 12px;gap:5px}.dashboard .meter{padding:7px}.dashboard .meter b{font-size:17px}.dashboard .controls{grid-template-columns:1fr;gap:7px}
+.switch-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:7px;background:#333;border:1px solid #666;color:#fff;border-radius:5px;padding:8px;cursor:pointer;text-align:left;font-size:12px}.switch-row .track{width:42px;height:23px;border-radius:18px;background:#777;flex:none;position:relative;transition:background .2s}.switch-row .track:before{content:'';position:absolute;left:3px;top:3px;width:17px;height:17px;background:white;border-radius:50%;transition:transform .2s}.switch-row.on .track{background:#148b69}.switch-row.on .track:before{transform:translateX(19px)}
+.dashboard .goal{font-size:12px;margin:8px 0 0}.dashboard .alarm{font-size:13px;padding:7px;border-width:3px;margin:0 0 8px}.dashboard .meter.warning{background:#802020}
+@media(max-width:700px){.dashboard{width:42%;right:5px;top:5px;padding:7px;max-height:98%}.dashboard h2{font-size:12px}.dashboard .meters{grid-template-columns:1fr 1fr;gap:3px}.dashboard .meter{padding:3px}.dashboard .meter span{font-size:8px}.dashboard .meter b{font-size:12px}.switch-row{font-size:9px;padding:4px}.switch-row .track{width:32px;height:18px}.switch-row .track:before{height:12px;width:12px}.switch-row.on .track:before{transform:translateX(14px)}.dashboard .goal{font-size:9px}}
+/* Dashboard occupies its own column, never overlays the machinery. */
+.diagram-row{display:grid;grid-template-columns:minmax(0,1fr) 235px;gap:12px;align-items:start}
+.diagram-row .stage{min-width:0}
+.diagram-row .dashboard{position:static;width:100%;max-height:none;overflow:visible;box-shadow:none;z-index:auto;align-self:stretch;display:flex;flex-direction:column}.diagram-row .dashboard .meters{grid-template-columns:1fr;gap:5px}.diagram-row .dashboard .meter{padding:6px 8px;display:flex;justify-content:space-between;align-items:center;gap:5px}.diagram-row .dashboard .meter b{font-size:15px;white-space:nowrap}.diagram-row .dashboard .meter span{font-size:10px}.diagram-row .dashboard .controls{grid-template-columns:1fr}.diagram-row .dashboard #dashboardGoal{margin-top:auto}
+@media(max-width:1100px){.diagram-row{grid-template-columns:minmax(0,1fr) 225px}}
+@media(max-width:700px){.diagram-row{grid-template-columns:1fr}.diagram-row .dashboard{grid-row:1;padding:10px}.diagram-row .dashboard .meters{grid-template-columns:1fr}.diagram-row .dashboard .controls{grid-template-columns:1fr}.diagram-row .dashboard .switch-row{min-width:0}}
+header .brand-logo{width:110px;height:110px;object-fit:contain;flex:none;border-radius:2px} @media(max-width:550px){header .brand-logo{width:78px;height:78px}header{gap:14px}}
+
+.stoker-control{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#333;border:1px solid #666;border-radius:5px;padding:9px 8px;color:#fff;font-size:12px}
+.stoker-control select{min-width:115px;max-width:55%;background:#151515;color:#ffc16c;border:1px solid #f39312;border-radius:4px;padding:7px;font-weight:bold;font-size:12px}
+.diagram-row{background:#080808}.legend{color:#e6e6e6}
+.key{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.key:before{content:"";display:inline-block;width:24px;height:5px;border-radius:3px;background:var(--c)}.satkey{--c:#9853bf}.hotkey{--c:#e54a31}.exkey{--c:#e69b9b}.waterkey{--c:#178ac3}.drivekey{--c:#865128}.fluekey{--c:#a5a7a5}
+.status{display:flex;align-items:center;gap:14px;min-height:49px;flex-wrap:wrap;position:relative}
+.status #statusMessage{flex:1;min-width:180px}
+.status .alarm{display:none;margin:0;padding:5px 12px;border-width:2px;font-size:13px;flex:0 1 auto}
+.status .alarm.active{display:block}
+.dashboard .meter b{transition:color .15s}
+.dashboard .meter.warning b{color:#ff5252!important;font-weight:900}
+
+/* Versie 32: geluidsbediening */
+.audio-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;background:#303030;border:1px solid #f39312;border-radius:5px;color:#fff;padding:11px 10px;margin:12px 0;cursor:pointer;font-weight:700;font-size:13px;min-height:44px}.audio-toggle[aria-pressed="true"]{background:#244a3e;border-color:#62c79a}.audio-toggle:focus-visible{outline:3px solid #ffc16c;outline-offset:2px}.audio-note{font-size:10px;color:#bdbdbd;margin:0 0 10px}
+
+/* Identieke geometrie voor plaats, slepen en gemonteerde apparatuur. */
+.slot { opacity:.34; filter:grayscale(1); cursor:pointer }
+.slot * { pointer-events:none }
+.slot.target { opacity:.78; filter:drop-shadow(0 0 8px #27df87) grayscale(.25) }
+.slot.wrong { opacity:.6; filter:drop-shadow(0 0 8px #ff4b40) grayscale(1) }
+.equipment-label { font-size:13px; fill:#e6e9e8; text-anchor:middle; paint-order:stroke; stroke:#101719; stroke-width:4px; stroke-linejoin:round; pointer-events:none; font-weight:400 }
+.equipment-label.installed { font-weight:900; fill:#ffcc79 }
+.pipe.inactive { stroke:#81898b !important; opacity:.8 }
+.pipe.active-flow.steam { stroke:#9853bf }
+.pipe.active-flow.hot { stroke:#e54a31 }
+.pipe.active-flow.exhaust { stroke:#e69b9b }
+.pipe.active-flow.water { stroke:#178ac3 }
+.bundle[aria-pressed="true"] { border-color:#5dbb8c; background:#23483b }
+.ghost { background:transparent; border:none; padding:0; box-shadow:none; filter:drop-shadow(0 0 7px #ffb34d) }
+.ghost-shape { filter:none }
+
+/* Rustige, permanente rivierstroming: onafhankelijk van de gemaalpomp. */
+.river-current { pointer-events:none; opacity:.36; }
+.river-current path { fill:none; stroke:#a7e3ef; stroke-width:2; stroke-linecap:round; stroke-dasharray:17 55; }
+.river-current .maas-current { animation: maasDown 9s linear infinite; }
+.river-current .wetering-current { animation: weteringLeft 10s linear infinite; }
+@keyframes maasDown { from { stroke-dashoffset:0; } to { stroke-dashoffset:-144; } }
+@keyframes weteringLeft { from { stroke-dashoffset:-144; } to { stroke-dashoffset:0; } }
+@media (prefers-reduced-motion: reduce) { .river-current path { animation-duration:28s; opacity:.55; } }
+
+/* Compacte, volledig zichtbare selectie en drie systeemswitches */
+.sidebar{padding:12px 11px;align-self:start}
+.sidebar h2{font-size:16px;margin:5px 0 9px}
+.sidebar .parts{display:grid;grid-template-columns:1fr;gap:5px}
+.sidebar .part{display:flex;align-items:center;gap:8px;text-align:left;min-height:54px;padding:4px 8px;border-width:1px;border-radius:5px}
+.sidebar .part svg{flex:0 0 65px;width:65px;height:44px;display:block}
+.sidebar .part strong{font-size:12px;line-height:1.2;overflow-wrap:anywhere}
+.sidebar .part-label{flex:1;min-width:0}
+.sidebar .part.placed{opacity:.78}
+.sidebar .hint{font-size:10px;line-height:1.35;margin:8px 0 13px}
+.sidebar #connections{display:grid;grid-template-columns:1fr;gap:6px}
+.sidebar .bundle{grid-column:auto;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;padding:7px 9px;border:1px solid #666;background:#303030;border-radius:5px;min-height:38px}
+.sidebar .bundle.on{background:#20463b;border-color:#4aa887}
+.sidebar .bundle .track{width:39px;height:21px}
+.sidebar .bundle .track:before{width:15px;height:15px}
+.sidebar .bundle.on .track:before{transform:translateX(18px)}
+.sidebar #reset{margin-top:14px!important}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar .parts{grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar #connections{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:520px){.sidebar .parts{grid-template-columns:1fr}.sidebar #connections{grid-template-columns:1fr}}
+.victory{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:11000;background:rgba(0,20,8,.78);padding:20px;overflow:hidden}
+.victory.active{display:flex}
+.victory-inner{position:relative;z-index:2;width:min(490px,100%);padding:30px 26px;background:#132c21;color:#f4fff8;border:4px solid #54d88c;border-radius:15px;box-shadow:0 0 60px #20d76c70;text-align:center}
+.victory-trophy{font-size:52px}.victory h2{color:#80ffac;font-size:clamp(24px,4vw,34px);margin:10px 0}.victory p{font-size:17px;line-height:1.5}
+.victory-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.victory button{border:0;border-radius:7px;padding:12px 16px;cursor:pointer;font-weight:800;font-size:14px;background:#62e99a;color:#07331b}
+.victory button+button{background:#e9f8ed;color:#1a3626}
+.victory-fireworks{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.firework-spark{position:absolute;width:7px;height:7px;background:var(--spark);border-radius:50%;box-shadow:0 0 8px var(--spark);opacity:0;animation:firework-burst 1.9s ease-out forwards}
+@keyframes firework-burst{0%{transform:translate(0,0) scale(.3);opacity:0}10%{opacity:1}75%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.15);opacity:0}}
+@media(prefers-reduced-motion:reduce){.firework-spark{animation-duration:.1s}}
+
+/* v49: left assembly panel, central diagram and right operating panel */
+.layout{grid-template-columns:220px minmax(0,1fr);gap:10px;max-width:none;padding:10px;align-items:start}
+.layout>.sidebar{grid-column:1;grid-row:1;min-width:0}
+.layout>section{grid-column:2;grid-row:1;min-width:0}
+.diagram-row{grid-template-columns:minmax(0,1fr) 235px;gap:10px;align-items:stretch}
+.sidebar{padding:10px 9px}
+.sidebar h2{font-size:14px;margin:4px 0 7px}
+.sidebar .part{min-height:45px;padding:3px 5px;gap:6px}
+.sidebar .part svg{width:57px;height:38px;flex-basis:57px}
+.sidebar .part strong{font-size:11px}
+.sidebar .parts{gap:4px}
+.sidebar #connections{gap:5px}
+.sidebar .bundle{min-height:35px;padding:5px 7px}
+.sidebar .part.placed,.sidebar .bundle.on{background:#174a32!important;border-color:#41d17c!important;color:#eafff1!important;opacity:1!important}
+.sidebar .part.placed strong{color:#a3ffca}
+.sidebar .hint:empty{display:none}
+header{padding:8px 18px;gap:14px}
+header .brand-logo{width:65px;height:65px}
+.heading h1{font-size:clamp(19px,2vw,27px)}
+.heading p{margin-top:2px;font-size:11px}
+.stripe{height:7px}
+.status{gap:9px;min-height:47px;padding:7px 10px;flex-wrap:wrap}
+.status-objective{margin-left:auto;color:#a8ffbd;font-weight:800;white-space:nowrap}
+.status #statusMessage{flex:1 1 280px}
+#statusNotice{display:none}
+@media(max-width:1100px){.layout{grid-template-columns:190px minmax(0,1fr)}.diagram-row{grid-template-columns:minmax(0,1fr) 200px}}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.layout>.sidebar{grid-column:1;grid-row:1}.layout>section{grid-column:1;grid-row:2}.sidebar .parts{grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar #connections{grid-template-columns:repeat(3,minmax(0,1fr))}.diagram-row{grid-template-columns:1fr}.diagram-row .dashboard{grid-row:auto}}
+@media(max-width:460px){.sidebar #connections{grid-template-columns:1fr}}
+
+/* v50: panels start on precisely the same grid row; notices only over the diagram */
+@media(min-width:761px){
+ .layout{display:grid;grid-template-columns:220px minmax(0,1fr) 235px;grid-template-rows:34px auto auto;column-gap:10px;row-gap:8px;align-items:start}
+ .layout>section,.layout>section>.diagram-row{display:contents}
+ .layout>.sidebar{grid-column:1;grid-row:2;align-self:start;margin:0}
+ .layout .status{grid-column:2;grid-row:1;margin:0;min-height:34px;max-height:34px;overflow:hidden;padding:5px 10px;font-size:12px;flex-wrap:nowrap;align-items:center}
+ .layout .status #statusMessage{min-width:0;flex:1;line-height:1.3}
+ .layout .status .alarm{font-size:11px;padding:2px 6px}
+ .layout .stage{grid-column:2;grid-row:2;min-width:0}
+ .layout .dashboard{grid-column:3;grid-row:2;position:static;width:100%;max-height:none;align-self:start;margin:0;overflow:visible}
+ .layout .legend{grid-column:2;grid-row:3}
+}
+@media(min-width:761px) and (max-width:1100px){.layout{grid-template-columns:190px minmax(0,1fr) 200px}}
+
+/* v51: aligned panels, consistent typography and viewport-conscious diagram */
+@media(min-width:761px){
+ .layout{grid-template-rows:30px auto auto;row-gap:6px;padding-top:6px}
+ .layout>.sidebar{grid-column:1;grid-row:1 / 3;align-self:start}
+ .layout .dashboard{grid-column:3;grid-row:1 / 3;align-self:start}
+ .layout .status{grid-column:2;grid-row:1;min-height:30px;max-height:30px;padding:4px 9px}
+ .layout .stage{grid-column:2;grid-row:2;align-self:start}
+ .layout .stage svg{height:clamp(420px, calc(100vh - 190px), 650px);width:100%;object-fit:contain}
+ .layout .legend{grid-column:2;grid-row:3}
+}
+.sidebar h2,.diagram-row .dashboard h2{font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;line-height:1.25;color:#ff9b18;margin:4px 0 8px}
+.sidebar .bundle,.diagram-row .dashboard .switch-row,.diagram-row .dashboard .stoker-control{font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.25}
+.sidebar .bundle{min-height:36px}
+.diagram-row .dashboard .switch-row{min-height:36px}
+.diagram-row .dashboard .stoker-control{min-height:38px}
+@media(max-width:760px){.sidebar h2,.diagram-row .dashboard h2{font-size:14px}.stage svg{max-height:70vh}}
+
+/* Rookgassen en witte/grijze rook uit de schoorsteen */
+.pipe.flue{stroke:#777875!important;stroke-linejoin:round}
+.pipe.flue.active-flow{stroke:#c9cbc8!important}
+.flow[stroke="#f2f2ed"].running{stroke:#f6f7f1;stroke-width:6;stroke-dasharray:13 13;filter:drop-shadow(0 0 2px #f4f5ed)}
+.smoke-puff{fill:#e5e6e4;stroke:#c9cdcb;stroke-width:1;pointer-events:none;animation:chimneyDrift 4.1s linear infinite;transform-box:fill-box;transform-origin:center;}
+@keyframes chimneyDrift{0%{transform:translate(0,12px) scale(.7);opacity:0}18%{opacity:.48}80%{opacity:.24}100%{transform:translate(20px,-72px) scale(1.9);opacity:0}}
+
+/* v57: audio toggle, reset in control panel and exhaust-flow visibility */
+.dashboard .audio-separator{height:2px;background:#f39312;margin:12px 0 8px;border-radius:2px;opacity:.9}
+.dashboard #reset{display:block;width:100%;margin-top:9px!important;padding:9px 12px}
+.dashboard .sound-switch{width:100%;display:flex;align-items:center;justify-content:space-between;margin-top:9px;cursor:pointer}
+.dashboard .sound-switch .track{display:block;position:relative;width:42px;height:23px;border-radius:20px;background:#777;flex-shrink:0;transition:background .2s}
+.dashboard .sound-switch .track:after{content:'';position:absolute;width:17px;height:17px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s}
+.dashboard .sound-switch.on .track{background:#268b5c}
+.dashboard .sound-switch.on .track:after{transform:translateX(19px)}
+.flow.running.exhaust-flow{opacity:1;filter:drop-shadow(0 0 2px #fff1e9)}
+
+/* v58: ooievaars-easteregg, dezelfde donkere/oranje stijl als de simulator */
+.stork-gameover{display:none;position:fixed;inset:0;z-index:10020;background:rgba(4,14,15,.94);align-items:center;justify-content:center;padding:20px}
+.stork-gameover.active{display:flex}
+.stork-card{max-width:540px;width:100%;background:#242b2c;border:4px solid #f39312;border-radius:10px;text-align:center;padding:22px 26px 26px;color:#f6f6f6;box-shadow:0 0 60px #000}
+.stork-card h2{color:#f5a126;font-size:25px;margin:8px 0 14px}
+.stork-card p{line-height:1.5;font-size:15px}
+.stork-card button{margin-top:12px;background:#f39312;border:0;border-radius:5px;padding:12px 22px;font-size:16px;font-weight:800;color:#171717;cursor:pointer}
+.stork-illustration svg{width:min(100%,340px);height:170px;overflow:visible}
+
+/* v59: cursor sits at the center of the actual equipment silhouette */
+.ghost{padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;width:150px;height:150px;transform:translate(-50%,-50%);filter:drop-shadow(0 0 5px #f39312) drop-shadow(0 2px 3px #000)}
+.ghost svg{width:150px;height:150px;overflow:visible}
+/* v61: uniform flow width on vertical and horizontal steam/water pipes. */
+#stream-hot.running{stroke-dasharray:10 12;animation-duration:5.5s;filter:drop-shadow(0 0 2px #ff8b6e)}
+#pipe-out,#stream-out{stroke-linecap:butt}
+</style><style>
+.feed-slider-control{background:#303030;border:1px solid #555;border-radius:6px;padding:5px 9px;margin-top:3px;color:#eee}
+.feed-slider-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px}
+.feed-slider-head strong{color:#ffad38;font-size:12px;white-space:nowrap}
+#feedSetting,#stokerTempo{width:100%;margin:4px 0 0;accent-color:#ff9b16;cursor:pointer;height:17px}
+.feed-slider-ticks{display:flex;justify-content:space-between;padding:0 4px;color:#c9c9c9;font-size:10px;line-height:12px}
+</style></head><body><div class="stripe"></div><header><img class="brand-logo" src="data:image/png;base64,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" alt="Logo Stoomgemaal De Tuut"><div class="heading"><h1>Stoomgemaal de Tuut Simulator</h1><p>Bouw, stook en pomp! Kun jij het stoomgemaal draaiende houden?</p></div></header><main class="layout"><section><div class="status" id="status">Selecteer een onderdeel en sleep het naar de juiste fundatie, of tik op onderdeel en fundatie.</div><div class="alarm" id="alarm" role="alert">⚠️ LAAG KETELWATER — BLACKFLUIT! ONDER 20% — VOED DE KETEL!</div><div class="diagram-row"><div class="stage"><svg id="scene" viewBox="0 0 1160 780" aria-label="Stoomgemaal de Tuut: machinekamer links, ketelhuis rechts, waterlopen onderaan"><defs><linearGradient id="floor" x1="0" x2=".8" y1="0" y2="1"><stop stop-color="#343d3c"/><stop offset="1" stop-color="#1d292b"/></linearGradient><linearGradient id="iron" x2="0" y2="1"><stop stop-color="#a4b0ac"/><stop offset="1" stop-color="#566b70"/></linearGradient></defs><rect width="1160" height="780" fill="#090d0f"/>
+<rect x="0" y="30" width="605" height="590" fill="#242c2d" stroke="#6a7776" stroke-width="3" rx="6"/>
+<rect x="625" y="30" width="305" height="590" fill="#2b2926" stroke="#8b7770" stroke-width="3" rx="6"/>
+<text x="18" y="64" font-size="25" fill="#f5a126" font-weight="bold">MACHINEKAMER</text>
+<text x="646" y="64" font-size="25" fill="#f5a126" font-weight="bold">KETELHUIS</text>
+<!-- Nieuwe Wetering: horizontal tributary, closed sluice at the Maas -->
+<path d="M0 710 H1120" stroke="#178ac3" stroke-width="56" fill="none"/>
+
+<!-- Maas is a separate vertical watercourse, not an extension of the Wetering -->
+<path d="M1120 0 V780" stroke="#178ac3" stroke-width="112" fill="none"/>
+
+<!-- Zachte stromingsstreepjes: Maas naar beneden, Wetering uitsluitend rechts van gesloten schutsluis naar rechts. -->
+<g class="river-current" aria-hidden="true">
+  <g class="maas-current">
+    <path d="M1086 -35 V820"/><path d="M1107 -35 V820" style="animation-delay:-2.5s"/>
+    <path d="M1129 -35 V820" style="animation-delay:-5s"/><path d="M1150 -35 V820" style="animation-delay:-7s"/>
+  </g>
+  <g class="wetering-current">
+    <path d="M914 699 H1080"/><path d="M914 721 H1080" style="animation-delay:-4s"/>
+  </g>
+</g>
+<text x="505" y="717" text-anchor="middle" font-size="22" fill="#fff" font-weight="bold">Nieuwe Wetering</text>
+<text x="1120" y="390" text-anchor="middle" font-size="25" fill="#fff" font-weight="bold" transform="rotate(-90 1120 390)">Maas</text>
+<g id="sluice" aria-label="Gesloten schutsluis met één paar puntdeuren">
+
+
+<path d="M876 679 L905 710 L876 741" fill="none" stroke="#6d3e22" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M876 679 L905 710 L876 741" fill="none" stroke="#d79658" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="876" cy="679" r="5" fill="#edbf80"/><circle cx="876" cy="741" r="5" fill="#edbf80"/>
+<text x="901" y="768" font-size="12" font-weight="bold" fill="white" text-anchor="middle">Schutsluis dicht</text>
+</g>
+<g id="pipes"></g><g id="slots"></g><g id="machines"></g><g id="equipmentLabels"></g><g id="effects"></g><g id="whistleFx"></g><g id="chimneySmoke"></g><g id="storkNest" aria-hidden="true" style="display:none"></g></svg></div><div class="dashboard" id="dashboard"><h2>3. Status stoominstallatie</h2><div id="dashboardAlarm"></div><div id="dashboardMeters"></div><h2>4. Bediening stoominstallatie</h2><div id="dashboardControls"></div><div id="dashboardGoal"></div></div></div><div class="legend"><span class="key satkey">Verzadigde stoom</span> · <span class="key hotkey">Oververhitte stoom</span> · <span class="key exkey">Uitgewerkte stoom</span> · <span class="key waterkey">Water / weeswater</span> · <span class="key drivekey">Mechanische aandrijving</span> · <span class="key fluekey">Rookgassen</span>. </div></section><aside class="sidebar"><h2>1. Plaats alle componenten</h2><div class="parts" id="parts"></div><p class="hint"></p><h2>2. Sluit systemen aan</h2><div class="controls" id="connections"></div><div class="controls" id="controls"><div class="feed-slider-control stoker-slider-control"><div class="feed-slider-head"><label for="stokerTempo">Stokertempo</label><strong id="stokerTempoValue">0 · Uit</strong></div><input id="stokerTempo" type="range" min="0" max="3" step="1" value="0" aria-label="Stokertempo stand 0 tot 3"/><div class="feed-slider-ticks"><span>0</span><span>1</span><span>2</span><span>3</span></div></div><button class="switch-row" data-ctl="valve" aria-pressed="false"><span>Hoofdstoom</span><span class="track"></span></button><div class="feed-slider-control"><div class="feed-slider-head"><label for="feedSetting">Plunjerpomp</label><strong id="feedSettingValue">0 · Uit</strong></div><input id="feedSetting" type="range" min="0" max="3" step="1" value="0" aria-label="Plunjerpomp stand 0 tot 3"/><div class="feed-slider-ticks"><span>0</span><span>1</span><span>2</span><span>3</span></div></div></div><div class="meters"><div class="meter"><span>Ketelwater temperatuur</span><b id="temp">20 °C</b></div><div class="meter"><span>Stoomdruk</span><b id="pressure">0.0 kg/cm²</b></div><div class="meter"><span>Ketelwater niveau</span><b id="level">75%</b></div><div class="meter"><span>Toerental</span><b id="rpm">0 rpm</b></div><div class="meter"><span>Waterdebiet</span><b id="flow">0 m³/min</b></div><div class="meter"><span>Verpompt</span><b id="volume">0 m³</b></div><div class="meter"><span>Kolenverbruik</span><b id="coalRate">0,0 kg/min</b></div><div class="meter"><span>Kolen totaal</span><b id="coalTotal">0,0 kg</b></div></div><p class="goal" id="goal">Doel: verpomp 500 m³ naar de Maas.</p><button class="btn" id="reset" style="width:100%;margin-top:10px">Opnieuw beginnen</button></aside></main><div class="gameover" id="gameover"><div class="gameover-inner"><h2>💥 KETEL GEËXPLODEERD</h2><p id="gameoverReason">Het waterniveau is tot 10% gedaald. Je hebt verloren.</p><p>Dit is een fictieve spelanimatie, geen voorspelling van echt ketelgedrag.</p><button id="restartGame">Opnieuw beginnen</button></div></div><div class="stork-gameover" id="storkGameover" role="dialog" aria-modal="true" aria-labelledby="storkTitle" aria-hidden="true"><div class="stork-card"><div class="stork-illustration" id="storkIllustration" aria-hidden="true"></div><h2 id="storkTitle">OOIEVAARS OP DE SCHOORSTEEN!</h2><p>Het gemaal stond na voltooiing van de installatie twee minuten stil zonder te stoken. Een ooievaarspaar heeft een nest op de schoorsteen gebouwd.</p><p><strong>Game over:</strong> het gemaal mag niet meer worden opgestart zolang het nest bewoond is.</p><button id="storkRestart" type="button">Opnieuw beginnen</button></div></div><div class="victory" id="victory" role="dialog" aria-modal="true" aria-labelledby="victoryTitle" aria-hidden="true"><div class="victory-fireworks" id="victoryFireworks" aria-hidden="true"></div><div class="victory-inner"><div class="victory-trophy">🏆</div><h2 id="victoryTitle">Gefeliciteerd, gewonnen!</h2><p>Je hebt <strong>500 m³ water</strong> van de Nieuwe Wetering naar de Maas verpompt!</p><div class="victory-actions"><button id="continueGame" type="button">Verder spelen</button><button id="victoryRestart" type="button">Opnieuw beginnen</button></div></div></div><script>
+const $=id=>document.getElementById(id);
+// Saturated-water temperature in °C at ABSOLUTE pressure in bar, interpolated
+// from standard saturated-steam tables. Boiler gauge pressure + 1.01325 bar.
+const saturationTable=[[1.0,99.63],[1.01325,100],[1.5,111.37],[2,120.21],[3,133.53],[4,143.61],[5,151.83],[6,158.83],[7,164.95],[8,170.41],[9,175.36],[10,179.88],[11,184.06],[12,187.96],[13,191.60],[14,195.04],[15,198.28],[16,201.37],[17,204.30],[18,207.11]];
+function saturationTemperature(gaugeBar){const absolute=gaugeBar+1.01325;for(let i=1;i<saturationTable.length;i++){const [p,t]=saturationTable[i],[p0,t0]=saturationTable[i-1];if(absolute<=p)return t0+(t-t0)*(absolute-p0)/(p-p0)}return saturationTable.at(-1)[1]}
+
+const items=[{id:'boiler',name:'Stoomketel',desc:'Ketel met twee vuurgangen',x:800,y:445},{id:'super',name:'Oververhitter',desc:'Verhit verzadigde stoom',x:800,y:185},{id:'engine',name:'Stoommachine + vliegwiel',desc:'Zichtbare zuigerstang, scharnierende drijfstang, krukpen en krukas',x:145,y:290},{id:'plunger',name:'Plunjerpomp',desc:'Voedingswater naar de ketel',x:365,y:290},{id:'centrifugal',name:'Centrifugaalpomp',desc:'Nieuwe Wetering → Maas',x:535,y:297},{id:'condenser',name:'Condensor + natte-luchtpomp',desc:'Uitgewerkte stoom in, weeswater naar de Wetering',x:95,y:515},{id:'chimney',name:'Schoorsteen',desc:'Afvoer van rookgassen',x:1000,y:395}];
+const pos=Object.fromEntries(items.map(i=>[i.id,[i.x,i.y]]));pos.wetering=[470,715];pos.maas=[1120,605];
+const bundles=[{id:'water',name:'Water',desc:'Aanvoer, ketelvoeding, afvoer en weeswater',ids:['intake1','intake2','feed','out','wees']},{id:'steam',name:'Stoom',desc:'Verzadigde, oververhitte en uitgewerkte stoom',ids:['sat','hot','exhaust']},{id:'flue',name:'Rookgassen',desc:'Rookgassen van ketel naar schoorsteen en oververhitter',ids:['flueStack','flueSuper']},{id:'drive',name:'Mechanisch',desc:'Krukas, plunjerpomp en centrifugaalpomp',ids:['shaft1','shaft2']}];
+const links=[['sat','Ketel → oververhitter','boiler','super','steam'],['hot','Oververhitter → machine','super','engine','hot'],['shaft1','Machine → plunjerpomp','engine','plunger','drive'],['shaft2','Plunjerpomp → centrifugaalpomp','plunger','centrifugal','drive'],['intake1','Wetering → plunjerpomp','wetering','plunger','water'],['feed','Plunjerpomp → ketel','plunger','boiler','water'],['intake2','Wetering → centrifugaalpomp','wetering','centrifugal','water'],['out','Centrifugaalpomp → Maas','centrifugal','maas','water'],['exhaust','Cilinder → condensor','engine','condenser','exhaust'],['wees','Condensor/natte-luchtpomp → Wetering','condenser','wetering','water'],['flueStack','Ketel → schoorsteen','boiler','chimney','flue'],['flueSuper','Ketel → oververhitter','boiler','super','flue']];
+let placed=new Set(),wired=new Set(),selected=null,ctl={},temp=20,pressure=0,level=75,rpm=0,flow=0,volume=0,phase=0,feedRate=0,coalRate=0,coalTotal=0,stokerTempo="stopped",feedSetting=0,won=false,lost=false,drag=null,hover=null,ghost=null;
+const icon={boiler:'<rect x="8" y="20" width="78" height="26" rx="13" fill="#a66e3a"/><ellipse cx="47" cy="20" rx="39" ry="12" fill="#d4a36a"/><rect x="68" y="3" width="13" height="18" fill="#8e4c2d"/>',super:'<rect x="7" y="15" width="80" height="35" rx="4" fill="#94683e"/><path d="M17 23H76M17 32H76M17 41H76" stroke="#ffb454" stroke-width="5"/>',engine:'<rect x="3" y="19" width="42" height="27" rx="5" fill="#9ba9a4"/><path d="M45 33H61" stroke="#e4b46a" stroke-width="5"/><circle cx="72" cy="33" r="19" stroke="#b77926" stroke-width="7" fill="none"/><path d="M72 14V52M53 33H91" stroke="#9c672b" stroke-width="4"/>',plunger:'<rect x="8" y="23" width="75" height="23" rx="5" fill="#6b8d83"/><rect x="33" y="7" width="22" height="20" fill="#c6c6b3"/>',condenser:'<rect x="8" y="15" width="78" height="38" rx="10" fill="#bd8d70"/><path d="M20 25H75M20 38H75" stroke="#e8d7be" stroke-width="5"/>',wetpump:'<rect x="14" y="17" width="68" height="33" rx="7" fill="#5a929b"/><circle cx="48" cy="32" r="12" fill="#c2dce0"/>',chimney:'<path d="M23 54 L31 11 H61 L69 54 Z" fill="#a95540" stroke="#d48c70" stroke-width="2"/><path d="M30 17H62 M29 22H63 M28 27H64 M27 32H65" stroke="#e3aa91" stroke-width="2"/><path d="M27 10H65V5H27Z" fill="#b97057" stroke="#e2a38a" stroke-width="2"/><ellipse cx="46" cy="5" rx="20" ry="5" fill="#5b3934" stroke="#dca18b" stroke-width="2"/><ellipse cx="46" cy="5" rx="13" ry="3" fill="#262829"/>',centrifugal:'<circle cx="43" cy="32" r="22" fill="#277e9f" stroke="#79c8d8" stroke-width="6"/><path d="M55 10H82V32" fill="none" stroke="#79c8d8" stroke-width="9"/><circle cx="43" cy="32" r="8" fill="#114a65"/>'};
+const formatNL=(value,decimals=0)=>Number(value).toLocaleString('nl-NL',{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
+function log(t){if(t&&$('statusNotice')){$('statusNotice').textContent=t;}}function has(...a){return a.every(x=>placed.has(x))}function connected(...a){return a.every(x=>wired.has(x))}function iso(x,y,w=75,h=35){return `${x},${y-h} ${x+w},${y} ${x},${y+h} ${x-w},${y}`}
+function pathFor(l){const routes={
+ sat:'M814 333 V166',
+ hot:'M800 143 H66 V225 M66 143 H126 V225',
+ shaft1:'M202 248 H365',
+ shaft2:'M365 248 H535',
+ intake1:'M365 674 V290',
+ feed:'M365 203 V181 H690 V415 H722',
+ intake2:'M535 674 V282',
+ out:'M620 278 V615 H1064',
+ exhaust:'M95 248 V447',
+ wees:'M95 515 V674',
+ flueStack:'M878 395 H1000',
+ flueSuper:'M878 395 H920 V143 H862',
+ };return routes[l[0]]||''}
+function pipeWidth(id){return id==='out'||id==='intake2'?22:id==='intake1'||id==='feed'||id==='condensate'||id==='wees'||id==='exhaust'?8:8}
+function flowColor(id){return id.startsWith('flue')?'#f2f2ed':id==='sat'?'#dc91ff':id==='hot'?'#ff674e':id==='exhaust'?'#fff0ec':'#74e2ff'}
+function renderStatic(){
+$('pipes').innerHTML=links.filter(l=>wired.has(l[0])&&!['shaft1','shaft2'].includes(l[0])).map(l=>`<path id="pipe-${l[0]}" d="${pathFor(l)}" class="pipe inactive ${l[4]}" style="${l[0]==='out'?'stroke-linecap:butt;':''}stroke-width:${pipeWidth(l[0])}"/><path id="stream-${l[0]}" d="${pathFor(l)}" class="flow ${l[0]==='exhaust'?'exhaust-flow':''}" stroke="${flowColor(l[0])}" style="stroke-width:${['sat','hot','exhaust','wees','feed','intake1'].includes(l[0])?pipeWidth(l[0]):Math.max(3,pipeWidth(l[0])*.55)}"/>`).join('');
+const machineMarkup=items.map(i=>{let x=i.x,y=i.y,shape='';if(i.id==='boiler')shape=`<rect x="${x-78}" y="${y-85}" width="156" height="70" rx="34" fill="#ad7949" stroke="#e3ad68" stroke-width="4"/><rect x="${x-64}" y="${y-80}" width="128" height="60" rx="25" fill="#c18c54" opacity=".45"/><ellipse cx="${x-78}" cy="${y-50}" rx="17" ry="35" fill="#d8a56d" stroke="#70462e" stroke-width="4"/><ellipse cx="${x-89}" cy="${y-50}" rx="6" ry="10" fill="#362e28" stroke="#e8bb7c" stroke-width="2"/><ellipse cx="${x-74}" cy="${y-50}" rx="6" ry="10" fill="#362e28" stroke="#e8bb7c" stroke-width="2"/><path d="M${x-57} ${y-17}v12h115v-12" fill="none" stroke="#4b5550" stroke-width="7"/><rect x="${x-3}" y="${y-112}" width="35" height="30" rx="8" fill="#b47a43" stroke="#e8b375" stroke-width="3"/><ellipse cx="${x+14}" cy="${y-112}" rx="18" ry="6" fill="#d7a46d"/><g class="whistle"><path d="M${x-53} ${y-84}v-30h10v30" fill="none" stroke="#b9944c" stroke-width="5"/><rect x="${x-59}" y="${y-129}" width="22" height="16" fill="#202020"/><path d="M${x-64} ${y-129}l16-24 16 24z" fill="#151515"/><path d="M${x-39} ${y-121}l-8 7 8 5" fill="#151515"/></g>`;if(i.id==='super')shape=`<rect x="${x-62}" y="${y-66}" width="124" height="47" rx="8" fill="#ad7849" stroke="#f1bb79" stroke-width="3"/><path d="M${x-51} ${y-54}h102 M${x-51} ${y-39}h102" stroke="#edb85e" stroke-width="9" stroke-dasharray="16 7"/><circle cx="${x+14}" cy="${y-19}" r="5" fill="#c78b59"/>`;if(i.id==='engine')shape=`<rect x="${x-116}" y="${y-65}" width="117" height="52" rx="8" fill="url(#iron)" stroke="#485a5e" stroke-width="3"/><rect x="${x-109}" y="${y-49}" width="100" height="25" rx="3" fill="#3b535b"/><circle cx="${x+57}" cy="${y-42}" r="58" fill="#d9b46d" stroke="#9b641f" stroke-width="13"/><circle cx="${x+57}" cy="${y-42}" r="44" fill="#c3b89a" stroke="#b77924" stroke-width="4"/><g id="wheelSpokes"></g><circle cx="${x+57}" cy="${y-42}" r="11" fill="#5c5d55" stroke="#e4bd77" stroke-width="4"/><g id="mechanism"></g>`;if(i.id==='plunger')shape=`<rect x="${x-50}" y="${y-59}" width="100" height="46" rx="5" fill="#648b83" stroke="#354d4d" stroke-width="3"/><rect x="${x-22}" y="${y-87}" width="44" height="33" fill="#b4c5b8"/><g id="plungerMotion"></g>`;if(i.id==='condenser')shape=`<rect x="${x-52}" y="${y-68}" width="104" height="48" rx="15" fill="#bc9074" stroke="#825d51" stroke-width="4"/><path d="M${x-40} ${y-50}H${x+40} M${x-40} ${y-36}H${x+40}" stroke="#e4d4bd" stroke-width="6"/><rect x="${x-27}" y="${y-16}" width="54" height="31" rx="7" fill="#608e93" stroke="#35565b" stroke-width="3"/><circle cx="${x}" cy="${y}" r="10" fill="#9fd2da" stroke="#376675" stroke-width="3"/><g id="wetMotion"></g>`;if(i.id==='wetpump')shape=`<rect x="${x-43}" y="${y-65}" width="86" height="50" rx="9" fill="#608e93" stroke="#35565b" stroke-width="4"/><circle cx="${x}" cy="${y-40}" r="16" fill="#9fd2da" stroke="#376675" stroke-width="4"/><g id="wetMotion"></g>`;if(i.id==='centrifugal')shape=`<path d="M${x-42} ${y-46} C${x-55} ${y-86},${x-13} ${y-104},${x+20} ${y-92} C${x+49} ${y-83},${x+57} ${y-54},${x+48} ${y-30} L${x+85} ${y-30} L${x+85} ${y-8} L${x+28} ${y-8} C${x-13} ${y+8},${x-47} ${y-11},${x-42} ${y-46}Z" fill="#2b7b96" stroke="#79b9ca" stroke-width="7"/><circle cx="${x}" cy="${y-49}" r="35" fill="#145b78" stroke="#82c9d9" stroke-width="3"/><g id="impeller"></g><circle cx="${x}" cy="${y-49}" r="7" fill="#d3e8e8" stroke="#386a77" stroke-width="2"/>`;if(i.id==='chimney')shape=`<path d="M${x-28} ${y} L${x-18} ${y-282} L${x+18} ${y-282} L${x+28} ${y} Z" fill="#a95540" stroke="#d48c70" stroke-width="3"/><path d="M${x-19} ${y-250}H${x+19} M${x-20} ${y-229}H${x+20} M${x-21} ${y-208}H${x+21} M${x-22} ${y-187}H${x+22}" stroke="#e5a58d" stroke-width="4"/><path d="M${x-23} ${y-282}H${x+23}V${y-291}H${x-23}Z" fill="#b76c53" stroke="#e2a38a" stroke-width="3"/><ellipse cx="${x}" cy="${y-291}" rx="25" ry="8" fill="#6d4036" stroke="#d7a087" stroke-width="3"/><ellipse cx="${x}" cy="${y-291}" rx="17" ry="5" fill="#262829"/>`;return `<g class="machine" data-machine="${i.id}">${shape}</g>`}).join('');
+const library=document.createElementNS("http://www.w3.org/2000/svg","svg");library.innerHTML=machineMarkup;
+const shapeOf=id=>library.querySelector(`[data-machine="${id}"]`).innerHTML;
+$('slots').innerHTML=items.filter(i=>!placed.has(i.id)).map(i=>`<g class="slot" data-slot="${i.id}">${shapeOf(i.id)}</g>`).join('');
+$('machines').innerHTML=items.filter(i=>placed.has(i.id)).map(i=>`<g class="machine" data-machine="${i.id}">${shapeOf(i.id)}</g>`).join('');
+$('equipmentLabels').innerHTML=items.map(i=>`<text class="equipment-label ${placed.has(i.id)?'installed':''}" x="${i.x}" y="${i.y+({boiler:15,super:-4,engine:32,plunger:6,centrifugal:24,condenser:27,chimney:22}[i.id]??20)}">${i.id==='condenser'?`<tspan x="${i.x}" dy="0">Condensor +</tspan><tspan x="${i.x}" dy="14">natte-luchtpomp</tspan>`:i.id==='engine'?'Stoommachine + vliegwiel':i.name}</text>`).join('');
+if(connected('shaft1','shaft2'))$('machines').insertAdjacentHTML('afterbegin','<path d="M202 248 H535" stroke="#865128" stroke-width="11" stroke-linecap="butt" fill="none" pointer-events="none"/>');
+$('parts').innerHTML=items.map(i=>`<button class="part ${placed.has(i.id)?'placed':''} ${selected===i.id?'active':''}" data-part="${i.id}" ${placed.has(i.id)?'disabled':''} title="${i.desc}"><svg viewBox="${i.x-125} ${i.y-165} 250 250" preserveAspectRatio="xMidYMid meet">${shapeOf(i.id)}</svg><span class="part-label"><strong>${i.name}</strong></span></button>`).join('');$('connections').innerHTML=bundles.map(b=>`<button class="bundle switch-row ${b.ids.every(id=>wired.has(id))?'on':''}" data-bundle="${b.id}" aria-pressed="${b.ids.every(id=>wired.has(id))}" title="${b.desc}"><span>${b.name}</span><span class="track"></span></button>`).join('');document.querySelectorAll('[data-ctl]').forEach(b=>{b.classList.toggle('on',!!ctl[b.dataset.ctl]);b.setAttribute('aria-pressed',String(!!ctl[b.dataset.ctl]));});}
+
+function updateGuidance(){
+ const missing=items.filter(i=>!placed.has(i.id));
+ const disconnected=bundles.filter(b=>!b.ids.every(id=>wired.has(id)));
+ let msg='';
+ if(lost)msg='KETEL GEËXPLODEERD — SPEL VERLOREN';
+ else if(level<20)msg='⚠ LAAG KETELWATER — activeer de plunjerpomp en controleer de voeding!';
+ else if(pressure>WARNING_PRESSURE_BAR)msg='⚠ KETELDRUK TE HOOG — verminder het stoken!';
+ else if(missing.length)msg=selected?'Plaats '+items.find(i=>i.id===selected).name+' op de bijbehorende contour.':'Plaats de apparatuur: nog '+missing.length+' van 7 componenten te plaatsen.';
+ else if(disconnected.length)msg='Schakel de verbindingen in: '+disconnected.map(b=>b.name).join(', ')+'.';
+ else if(!ctl.valve)msg='Stook de ketel, open de hoofdstoomafsluiter en start de installatie.';
+ else msg='Gemaal in bedrijf! Regel het stoken en verpomp water van de wetering naar de Maas.';
+ $('statusMessage').textContent=msg;const objective=$('statusObjective');if(objective)objective.textContent='Doel: 500 m³ · '+formatNL(Math.min(volume,500),1)+' m³ verpompt';
+
+}
+function place(id){if(!selected)return log('Selecteer eerst een onderdeel.');if(id!==selected)return log('Dit is niet de juiste fundatie.');placed.add(id);selected=null;renderStatic();log('Gemonteerd: '+items.find(i=>i.id===id).name);updateGuidance()}
+$('scene').addEventListener('click',e=>{let s=e.target.closest('[data-slot]');if(s)place(s.dataset.slot)});$('parts').addEventListener('click',e=>{let p=e.target.closest('[data-part]');if(p&&!placed.has(p.dataset.part)){selected=p.dataset.part;renderStatic();updateGuidance()}});
+function localPoint(cx,cy){let s=$('scene'),p=s.createSVGPoint();p.x=cx;p.y=cy;return p.matrixTransform(s.getScreenCTM().inverse())}function updateHover(cx,cy){let p=localPoint(cx,cy),near=null,best=1e9;for(let i of items){if(placed.has(i.id))continue;let d=Math.hypot(p.x-i.x,(p.y-i.y)*.85);if(d<best){best=d;near=i.id}}hover=best<105?near:null;document.querySelectorAll('.slot').forEach(s=>{s.classList.toggle('target',s.dataset.slot===hover&&hover===drag?.id);s.classList.toggle('wrong',s.dataset.slot===hover&&hover!==drag?.id)})}
+$('parts').addEventListener('pointerdown',e=>{let p=e.target.closest('[data-part]');if(!p||p.disabled)return;drag={id:p.dataset.part,x:e.clientX,y:e.clientY,moved:false};e.preventDefault()});document.addEventListener('pointermove',e=>{if(!drag)return;if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<7)return;if(!drag.moved){drag.moved=true;ghost=document.createElement('div');ghost.className='ghost';const it=items.find(i=>i.id===drag.id);const existing=document.querySelector(`[data-slot="${drag.id}"]`);ghost.innerHTML=`<svg viewBox="${it.x-125} ${it.y-125} 250 250" width="150" height="150"><g class="ghost-shape">${existing?existing.innerHTML:''}</g></svg>`; document.body.appendChild(ghost)}ghost.style.left=e.clientX+'px';ghost.style.top=e.clientY+'px';updateHover(e.clientX,e.clientY)});document.addEventListener('pointerup',e=>{if(!drag)return;let d=drag;drag=null;if(ghost){ghost.remove();ghost=null}document.querySelectorAll('.slot').forEach(s=>s.classList.remove('target','wrong'));if(d.moved){if(hover===d.id){selected=d.id;place(d.id)}else log('Sleep het onderdeel naar de juiste fundatie.')}else{selected=d.id;renderStatic()}hover=null});document.addEventListener('pointercancel',()=>{drag=null;ghost?.remove();ghost=null});
+$('connections').addEventListener('click',e=>{let button=e.target.closest('[data-bundle]');if(!button||lost)return;let b=bundles.find(x=>x.id===button.dataset.bundle);let needed=[...new Set(b.ids.flatMap(id=>{let l=links.find(x=>x[0]===id);return [l[2],l[3]]}).filter(x=>x!=='wetering'&&x!=='maas'))];let missing=needed.filter(x=>!placed.has(x));if(missing.length)return log('Plaats eerst: '+missing.map(x=>items.find(i=>i.id===x).name).join(', '));const remove=b.ids.every(id=>wired.has(id));b.ids.forEach(id=>remove?wired.delete(id):wired.add(id));renderStatic();log((remove?'Leidinggroep ontkoppeld: ':'Complete groep aangesloten: ')+b.name);updateGuidance()});const feedSettingLabels=['Uit','Langzaam','Gemiddeld','Snel'];
+const stokerPositions=['stopped','slow','medium','fast'];
+const stokerLabels=['Uit','Langzaam','Gemiddeld','Snel'];
+function updateStokerTempoLabel(){const index=Math.max(0,stokerPositions.indexOf(stokerTempo));$('stokerTempoValue').textContent=index+' · '+stokerLabels[index];$('stokerTempo').setAttribute('aria-valuetext',stokerLabels[index]);}
+function updateFeedSettingLabel(){
+ $('feedSettingValue').textContent=feedSetting+' · '+feedSettingLabels[feedSetting];
+ $('feedSetting').setAttribute('aria-valuetext',feedSettingLabels[feedSetting]);
+}
+$('feedSetting').addEventListener('input',e=>{
+ if(lost)return;
+ if(Number(e.target.value)>0&&!has('plunger')){
+   e.target.value=String(feedSetting);
+   return log('Plaats eerst de plunjerpomp.');
+ }
+ feedSetting=Number(e.target.value);
+ updateFeedSettingLabel();
+ log('Plunjerpomp stand '+feedSetting+': '+feedSettingLabels[feedSetting]);
+});
+$('stokerTempo').addEventListener('input',e=>{if(lost)return;stokerTempo=stokerPositions[Number(e.target.value)];updateStokerTempoLabel();log('Stokertempo: '+stokerLabels[Number(e.target.value)]);});$('controls').addEventListener('click',e=>{let b=e.target.closest('[data-ctl]');if(!b||lost)return;let id=b.dataset.ctl;if(id==='fire'&&!has('boiler'))return log('Plaats eerst de ketel.');ctl[id]=!ctl[id];renderStatic();log(b.textContent+': '+(ctl[id]?'aan':'uit'))});
+function setStream(id,active){const el=$('stream-'+id);if(el)el.classList.toggle('running',!!active);const pipe=$('pipe-'+id);if(pipe){pipe.classList.toggle('inactive',!active);pipe.classList.toggle('active-flow',!!active)}}
+function animate(){let out='';let whistle=placed.has('boiler')&&level<20&&!lost;if(whistle){
+  const t=Date.now()/1200;
+  // Animated white condensation plumes escaping sideways from the black whistle.
+  const clouds=Array.from({length:9},(_,i)=>{
+    const progress=(t*.42+i/9)%1;
+    const cx=149+progress*145;
+    const cy=22-30*progress+Math.sin(t*2+i)*9;
+    const radius=5+progress*13;
+    return `<g opacity="${Math.max(.05,.92-progress*.86)}"><circle cx="${cx}" cy="${cy}" r="${radius}" fill="#fff" stroke="#aabcc2" stroke-width="1.3"/><circle cx="${cx+radius*.6}" cy="${cy-3}" r="${radius*.72}" fill="#f3f7f7"/></g>`;
+  }).join('');
+  $('whistleFx').innerHTML='<g transform="translate(615 235)">'+clouds+`<text x="155" y="61" fill="#d30000" stroke="#fff" stroke-width="3" paint-order="stroke" font-size="21" font-weight="900">Fluit, Fluit!!!!</text></g>`;
+}else $('whistleFx').innerHTML='';
+setStream('sat',temp>=100&&pressure>.05&&level>10&&ctl.valve&&wired.has('sat'));
+setStream('hot',temp>=100&&pressure>1&&ctl.valve&&wired.has('hot'));
+setStream('intake1',feedRate>0);setStream('feed',feedRate>0);
+setStream('intake2',flow>0);setStream('out',flow>0);
+const exhausting=rpm>5&&wired.has('exhaust');setStream('exhaust',exhausting);
+setStream('wees',exhausting&&wired.has('wees'));
+const flueActive=!lost&&placed.has('boiler')&&placed.has('chimney')&&wired.has('flueStack')&&stokerTempo!=='stopped';
+setStream('flueStack',flueActive);
+setStream('flueSuper',!lost&&placed.has('boiler')&&placed.has('super')&&wired.has('flueSuper')&&stokerTempo!=='stopped');
+const smokeHost=$('chimneySmoke');
+if(smokeHost){
+ const intensity={stopped:0,slow:4,medium:8,fast:13}[stokerTempo];
+ if(smokeHost.dataset.mode!==String(flueActive)+':'+stokerTempo){smokeHost.dataset.mode=String(flueActive)+':'+stokerTempo;smokeHost.innerHTML=flueActive?Array.from({length:intensity},(_,i)=>{const seed=i*7.39;const x=1000+Math.sin(seed)*12;const y=110-(i/intensity)*38;const r=6+(i/intensity)*15;return `<circle class="smoke-puff" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" style="animation-delay:${(-i*.31).toFixed(2)}s;opacity:${(.24+i/intensity*.17).toFixed(2)}"/>`}).join(''):'';}
+}
+if(placed.has('boiler')){
+ const bx=800,by=445,waterTop=by-15-70*level/100;
+ // Water is confined to the cylindrical side shell, never over the left end cap.
+ out+=`<defs><clipPath id="boilerWaterClip"><rect x="${bx-69}" y="${by-85}" width="140" height="70" rx="32"/></clipPath></defs><g clip-path="url(#boilerWaterClip)"><rect x="${bx-69}" y="${waterTop}" width="140" height="${by-15-waterTop}" fill="#178ac3" opacity=".72"/><path d="M${bx-69} ${waterTop} Q${bx-34} ${waterTop-3} ${bx} ${waterTop} T${bx+71} ${waterTop}" stroke="#86eaff" stroke-width="3" fill="none"/></g>`;
+ if(temp>=100){
+  const intensity=Math.min(1,(temp-100)/95),time=performance.now()/1000;
+  // Rising bubbles inside the water, and purple saturated steam above the waterline.
+  const bubbles=Math.round(18+60*intensity),steamCount=Math.round(10+26*intensity);
+  out+=`<g clip-path="url(#boilerWaterClip)">`;
+  for(let i=0;i<bubbles;i++){
+   const u=(time*(.34+intensity*.65)+i*.61803398875)%1;
+   const x=bx-63+(i*37%126),y=by-17-(u*(by-17-waterTop));
+   out+=`<circle cx="${x}" cy="${y}" r="${1.3+intensity*2.4+i%3*.55}" fill="none" stroke="#d3f6ff" stroke-width="1.5" opacity="${.35+.55*(1-u)}"/>`;
+  }
+  for(let i=0;i<steamCount;i++){
+   const u=(time*(.12+intensity*.28)+i*.41421356237)%1;
+   const x=bx-60+(i*43%120),y=waterTop-(5+u*Math.max(0,by-84-waterTop));
+   out+=`<circle cx="${x}" cy="${y}" r="${1.4+intensity*2.0}" fill="#d89af6" opacity="${.25+.35*Math.sin(Math.PI*u)}"/>`;
+  }
+  out+='</g>';
+ }
+ // Draw front plate last: the water never paints across the boiler front.
+ out+=`<ellipse cx="${bx-78}" cy="${by-50}" rx="17" ry="35" fill="#d8a56d" stroke="#70462e" stroke-width="4"/><ellipse cx="${bx-89}" cy="${by-50}" rx="6" ry="10" fill="#362e28" stroke="#e8bb7c" stroke-width="2"/><ellipse cx="${bx-74}" cy="${by-50}" rx="6" ry="10" fill="#362e28" stroke="#e8bb7c" stroke-width="2"/>`;
+ // Flame flicker in the two furnace openings when coal is being fired.
+ if(stokerTempo!=='stopped'&&!lost){
+  const flicker=Math.sin(performance.now()/125)*2;
+  for(const x of [bx-89,bx-74])out+=`<path d="M${x-4} ${by-44} Q${x-7} ${by-53+flicker} ${x} ${by-59-flicker} Q${x+6} ${by-51} ${x+4} ${by-44}Z" fill="#ff9b13" stroke="#ffdd52" stroke-width="1.4"/>`;
+ }
+}
+$('effects').innerHTML=out;
+if(placed.has('engine')){
+  // Correct left-hand slider-crank geometry, matching the supplied uniflow reference.
+  // The piston and crosshead move horizontally; only the connecting rod pivots.
+  // The connecting rod pivots at BOTH the crosshead and the crank pin.
+  const x=145,y=290,cx=x+57,cy=y-42,r=38,L=100;
+  const crankX=cx+r*Math.cos(phase),crankY=cy+r*Math.sin(phase);
+  const sliderX=crankX-Math.sqrt(L*L-(crankY-cy)**2);
+  const pistonX=sliderX-12;
+  $('wheelSpokes').innerHTML=`<g transform="rotate(${(phase*180/Math.PI)} ${cx} ${cy})">${[0,45,90,135].map(a=>`<line x1="${cx-38}" y1="${cy}" x2="${cx+38}" y2="${cy}" transform="rotate(${a} ${cx} ${cy})" stroke="#936022" stroke-width="6"/>`).join('')}<circle cx="${cx+32}" cy="${cy}" r="5" fill="#fff0ac"/></g>`;
+  $('mechanism').innerHTML=`
+    <defs><clipPath id="engineCylinderClip"><rect x="${x-108}" y="${y-49}" width="106" height="25" rx="3"/></clipPath></defs>
+    <g clip-path="url(#engineCylinderClip)">
+      <rect x="${pistonX-9}" y="${cy-12}" width="19" height="24" rx="3" fill="#e5c17e" stroke="#fff0c4" stroke-width="2"/>
+      
+    </g>
+    <line x1="${pistonX+10}" y1="${cy}" x2="${sliderX}" y2="${cy}" stroke="#c8d4d0" stroke-width="5"/>
+    <line x1="${cx}" y1="${cy}" x2="${crankX}" y2="${crankY}" stroke="#9b672c" stroke-width="10" stroke-linecap="round"/>
+    <line x1="${sliderX}" y1="${cy}" x2="${crankX}" y2="${crankY}" stroke="#69432a" stroke-width="11" stroke-linecap="round"/>
+    <line x1="${sliderX}" y1="${cy}" x2="${crankX}" y2="${crankY}" stroke="#d9a15b" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="${sliderX}" cy="${cy}" r="7" fill="#4b4c49" stroke="#f4d49a" stroke-width="3"/>
+    <circle cx="${cx}" cy="${cy}" r="8" fill="#4b4c49" stroke="#f4d49a" stroke-width="3"/>
+    <circle cx="${crankX}" cy="${crankY}" r="8" fill="#4b4c49" stroke="#f4d49a" stroke-width="3"/>
+  `;
+}
+
+if(placed.has('plunger')){const px=365,py=290,travel=feedSetting>0&&connected('shaft1','shaft2')&&rpm>0?12*Math.cos(phase):0;$('plungerMotion').innerHTML=`<rect x="${px-15}" y="${py-77}" width="30" height="13" rx="2" fill="#f6bf66" stroke="#744823" stroke-width="2"/><line x1="${px}" y1="${py-64}" x2="${px}" y2="${py-43+travel}" stroke="#e6d9ba" stroke-width="7"/><rect x="${px-19}" y="${py-43+travel}" width="38" height="12" rx="3" fill="#e8b05a" stroke="#795328" stroke-width="2"/>`;}
+if(placed.has('condenser')&&$('wetMotion')){
+  // De natte-luchtpomp heeft een verticale slag, in fase met de zichtbare krukas.
+  // Alleen actief als de stoommachine draait en de afvoerstoomleiding is aangesloten.
+  const wetRunning=rpm>0&&!lost&&placed.has('engine')&&connected('exhaust');
+  const stroke=wetRunning?7*Math.cos(phase):0;
+  $('wetMotion').innerHTML=`<line x1="95" y1="486" x2="95" y2="${508+stroke}" stroke="#d6e4df" stroke-width="5" stroke-linecap="round"/><rect x="78" y="${505+stroke}" width="34" height="9" rx="3" fill="#d4b16e" stroke="#654d39" stroke-width="2"/>`;
+}if(placed.has('centrifugal')){let x=535,y=248;const impellerAngle=connected('shaft1','shaft2')?phase:impellerStoppedPhase;$('impeller').innerHTML=`<g transform="rotate(${(impellerAngle*180/Math.PI)} ${x} ${y})">${[0,60,120,180,240,300].map(a=>`<path d="M${x+9} ${y+3} Q${x+18} ${y+21} ${x+31} ${y+13}" transform="rotate(${a} ${x} ${y})" stroke="#9be5ef" stroke-width="4.5" fill="none"/>`).join('')}</g>`}}
+function runningBalanceReady(){return has('boiler','super','engine','plunger')&&connected('sat','hot','shaft1','shaft2','intake1','feed')&&pressure>3&&temp>=100&&level>10;}
+// Pressure calculations use bar gauge internally; display and limits use kgf/cm².
+const KGCM2_PER_BAR=1.019716213;
+const WORK_PRESSURE_BAR=12/KGCM2_PER_BAR;
+const WARNING_PRESSURE_BAR=15/KGCM2_PER_BAR;
+const EXPLOSION_PRESSURE_BAR=18/KGCM2_PER_BAR;
+
+// Easteregg: pas nadat ALLE componenten en aansluitingen compleet zijn,
+// telt 120 seconden zonder stoken. Stoken onderbreekt en reset de timer.
+let idleAfterAssemblySeconds=0;
+const storkArtwork=`<g stroke-linejoin="round" stroke-linecap="round">
+<path d="M-56 0 L56 0 L49 18 L-49 18 Z" fill="#a4563b" stroke="#e29c78" stroke-width="3"/>
+<path d="M-75 -4 Q-40 -21 0 -7 Q40 -22 77 -4 M-68 1 Q-25 -12 25 4 Q45 -7 68 4 M-58 8 Q0 -5 57 9" fill="none" stroke="#ad7a46" stroke-width="5"/>
+<g transform="translate(-29,-13)"><path d="M-6 -2 L-7 -30 M8 -2 L9 -30" stroke="#df5331" stroke-width="3"/><ellipse cx="0" cy="-47" rx="18" ry="12" fill="#f7f1dc" stroke="#3d3832" stroke-width="2"/><path d="M-14 -43 L-23 -54 L-12 -48" fill="#333"/><path d="M9 -51 Q19 -62 12 -75" fill="none" stroke="#f7f1dc" stroke-width="9"/><circle cx="12" cy="-77" r="7" fill="#f7f1dc"/><circle cx="14" cy="-79" r="1.8" fill="#151515"/><path d="M18 -75 L42 -71 L19 -70 Z" fill="#f07825"/></g>
+<g transform="translate(28,-5) scale(.85)"><path d="M-5 -1 L-5 -15 M7 -1 L8 -15" stroke="#df5331" stroke-width="3"/><ellipse cx="0" cy="-26" rx="19" ry="12" fill="#f7f1dc" stroke="#3d3832" stroke-width="2"/><path d="M-15 -24 L-24 -34 L-11 -28" fill="#333"/><path d="M10 -30 Q20 -40 15 -48" fill="none" stroke="#f7f1dc" stroke-width="8"/><circle cx="15" cy="-50" r="7" fill="#f7f1dc"/><circle cx="17" cy="-51" r="1.8" fill="#151515"/><path d="M21 -48 L46 -44 L21 -43 Z" fill="#f07825"/></g></g>`;
+function showStorkEnding(){
+ if(lost)return;
+ lost=true;stokerTempo='stopped';coalRate=0;rpm=0;flow=0;ctl={};$('stokerTempo').value='0';updateStokerTempoLabel();
+ $('chimneySmoke').innerHTML='';
+ $('storkNest').style.display='';$('storkNest').innerHTML=`<g transform="translate(1000 104)">${storkArtwork}</g>`;
+ $('storkIllustration').innerHTML=`<svg viewBox="-95 -105 190 145" aria-hidden="true"><g transform="translate(0 3)">${storkArtwork}</g></svg>`;
+ $('storkGameover').classList.add('active');$('storkGameover').setAttribute('aria-hidden','false');
+ $('statusMessage').textContent='GAME OVER — Ooievaarsnest op de schoorsteen. Het gemaal mag niet meer draaien.';
+ if(typeof steamAudio!=='undefined'){steamAudio.storkClatter();steamAudio.reset();}
+}
+$('storkRestart').addEventListener('click',restart);
+
+function tick(){
+ if(lost)return;
+ const dt=.1;
+ const installationComplete=items.every(i=>placed.has(i.id))&&bundles.every(b=>b.ids.every(id=>wired.has(id)));
+ if(installationComplete&&stokerTempo==='stopped')idleAfterAssemblySeconds+=dt;
+ else idleAfterAssemblySeconds=0;
+ if(idleAfterAssemblySeconds>=120){showStorkEnding();return;}
+ // Stoker tempo controls heat input and coal use; nominal full firing = 4.5 kg/min.
+ const coalByTempo={stopped:0,slow:1.2,medium:3.0,fast:4.5};
+ coalRate=has('boiler')?coalByTempo[stokerTempo]:0;
+ coalTotal+=coalRate*dt/60;
+ const steamCircuit=ctl.valve&&connected('sat','hot');
+ const normalOperation=steamCircuit&&feedSetting>0&&runningBalanceReady();
+ if(has('boiler')&&level>10){
+   if(temp<100){
+     // Before boiling, medium and fast firing warm the cold boiler.
+     const heat={stopped:-.035,slow:.018,medium:.10,fast:.18}[stokerTempo];
+     temp=Math.min(100,Math.max(20,temp+heat));
+   }else{
+     // Once boiling, pressure determines saturation temperature.
+     // At operating conditions medium firing holds 12 kg/cm²; slow drops, fast rises.
+     const change={stopped:-.065,slow:-.030,medium:steamCircuit?(WORK_PRESSURE_BAR-pressure)*.025:.032,fast:normalOperation?.048:.075}[stokerTempo];
+     pressure=Math.max(0,Math.min(EXPLOSION_PRESSURE_BAR+.5,pressure+change));
+   }
+ }else{
+   pressure=Math.max(0,pressure-.04);
+   // Afkoeling gebeurt hieronder, ook na het wegvallen van de keteldruk.
+ }
+ // Steam consumption reduces pressure only when the valve is open and steam can flow.
+ if(steamCircuit&&pressure>0&&!normalOperation){pressure=Math.max(0,pressure-(rpm>5?.009:.002));}
+ // The steam engine may only start above 5 bar (gauge).
+ // At normal working pressure its governed speed is 190 rpm.
+ const running=!!(ctl.valve&&has('boiler','super','engine')&&connected('sat','hot')&&pressure>5&&temp>=100&&level>10);
+ const target=running?190*Math.min(1,(pressure-5)/2):0;
+ rpm+=(target-rpm)*.075;
+ if(rpm<.03)rpm=0;
+ // Bij stilgelegde stookinstallatie neemt de temperatuur eerst af met de
+ // dalende stoomdruk. Zodra de overdruk verdwenen is, koelt het ketelwater
+ // verder geleidelijk af tot de omgevingstemperatuur (20 °C).
+ // Niet telkens opnieuw 100 °C opleggen bij nul overdruk: dat voorkwam afkoeling.
+ if(pressure>0.02){
+   temp=saturationTemperature(pressure);
+ }else if(stokerTempo==='stopped'){
+   temp=Math.max(20,temp-0.018); // 0,18 °C/s, langzaam naar 20 °C
+ }
+ // Track the total water-level change (steam used AND feedwater added).
+ // Pressure/steam-space compensation must use the NET change, not feedwater alone.
+ const levelBeforeSteamCycle=level;
+ // Steam consumption is small at idle, higher while the engine runs.
+ if(temp>=100&&pressure>.05&&level>0){
+   const steamUse=(running?0.10+rpm*.00030:0.014);
+   level=Math.max(0,level-steamUse);
+ }
+ // Stand 0: geen voedingswater. Bij gemiddeld stoken en 190 rpm:
+ // stand 1 < stoomverbruik, stand 2 ≈ stoomverbruik, stand 3 > stoomverbruik.
+ const feedReady=feedSetting>0&&has('plunger')&&connected('shaft1','shaft2','intake1','feed')&&rpm>10;
+ const feedBySetting=[0,0.08,0.157,0.24];
+ feedRate=feedReady?(rpm/190)*feedBySetting[feedSetting]/0.25:0;
+ // Vereenvoudigd volume-/drukmodel: een stijgend waterniveau verkleint de
+ // beschikbare stoomruimte. Bij vrijwel constante temperatuur geeft Boyle
+ // P_abs * V_stoom = constant (benadering; geen volledige ketelthermodynamica).
+ // Het maximum van 95% voorkomt een nulvolume en laat de drukbeveiliging werken.
+ const previousLevel=levelBeforeSteamCycle;
+ if(feedReady)level=Math.min(95,level+feedBySetting[feedSetting]*(rpm/190));
+ if(temp>=100&&pressure>0.02&&level!==previousLevel){
+   const previousSteamFraction=Math.max(.05,1-previousLevel/100);
+   const currentSteamFraction=Math.max(.05,1-level/100);
+   // Only the NET change in steam space contributes. At stand 2, feed
+   // compensates steam use so pressure cannot climb from repeated refilling.
+   const absolutePressure=(pressure+1.01325)*previousSteamFraction/currentSteamFraction;
+   pressure=Math.max(0,Math.min(EXPLOSION_PRESSURE_BAR+.5,absolutePressure-1.01325));
+   temp=saturationTemperature(pressure);
+ }
+ if(level<=10||pressure>=EXPLOSION_PRESSURE_BAR){
+   steamAudio.explosion();lost=true;ctl={};rpm=0;flow=0;
+   $('alarm').classList.remove('active');$('gameover').classList.add('active');
+   $('statusMessage').textContent='KETEL GEËXPLODEERD — SPEL VERLOREN';
+   log(pressure>=EXPLOSION_PRESSURE_BAR?'💥 Keteldruk 18 kg/cm²: ketel geëxplodeerd.':'💥 Ketelwater 10%: spel verloren.');$('gameoverReason').textContent=pressure>=EXPLOSION_PRESSURE_BAR?'De keteldruk is opgelopen tot 18 kg/cm². Je hebt verloren.':'Het waterniveau is tot 10% gedaald. Je hebt verloren.';return;
+ }
+ $('pressure').closest('.meter').classList.toggle('warning',pressure>WARNING_PRESSURE_BAR);$('level').closest('.meter').classList.toggle('warning',level<20);$('alarm').classList.toggle('active',level<20||pressure>WARNING_PRESSURE_BAR);$('alarm').textContent=pressure>WARNING_PRESSURE_BAR?'⚠️ KETELDRUK TE HOOG! — BOVEN 15 kg/cm²': '⚠️ LAAG KETELWATER — BLACKFLUIT! ONDER 20% — VOED DE KETEL!';
+ flow=has('centrifugal','plunger','engine')&&connected('shaft1','shaft2','intake2','out')&&rpm>10?220*rpm/190:0;
+ volume+=flow*dt/60;
+ updateGuidance();
+ // De krukashoek wordt uitsluitend in animationFrame bijgewerkt: zuiger, vliegwiel en schoepenrad delen exact dezelfde fase.
+ if(volume>=500&&!won){won=true;if($('goal'))$('goal').textContent='Geslaagd! 500 m³ water naar de Maas verpompt.';showVictory();log('Missie voltooid!')}
+ [['temp',formatNL(temp,0)+' °C'],['pressure',formatNL(pressure*1.019716213,1)+' kg/cm²'],['level',formatNL(level,1)+'%'],['rpm',formatNL(rpm,0)+' rpm'],['flow',formatNL(flow,0)+' m³/min'],['volume',formatNL(volume,1)+' m³'],['coalRate',formatNL(coalRate,1)+' kg/min'],['coalTotal',formatNL(coalTotal,1)+' kg']].forEach(([id,v])=>$(id).textContent=v);
+}
+// Visual updates are independent of simulation steps. Never recreate the static pipes here.
+// Visuele vertraging voor leesbaarheid: alle mechanisch gekoppelde onderdelen delen dezelfde fase.
+const VISUAL_SPEED_FACTOR=0.30;
+let lastFrame=0,impellerStoppedPhase=0;
+function animationFrame(now){
+ // Een gedeelde krukashoek voor de complete aandrijflijn. Positieve SVG-hoeken draaien
+ // op het scherm met de klok mee. 1 krukasomwenteling = 1 vliegwielomwenteling.
+ if(lastFrame){
+  const elapsed=Math.min((now-lastFrame)/1000,0.10);
+  if(!lost&&rpm>0)phase=(phase+rpm/60*2*Math.PI*elapsed*VISUAL_SPEED_FACTOR)%(Math.PI*2);
+ }
+ lastFrame=now;
+ if(connected('shaft1','shaft2'))impellerStoppedPhase=phase;
+ if(!lost)animate();
+ requestAnimationFrame(animationFrame);
+}
+function showVictory(){
+ const popup=$('victory');popup.classList.add('active');popup.setAttribute('aria-hidden','false');
+ const host=$('victoryFireworks');host.innerHTML='';
+ const colors=['#ffcc35','#55d8ff','#ff638b','#8bff8b','#f4a7ff','#ffffff'];
+ for(let burst=0;burst<7;burst++){
+   const x=12+(burst*37%78),y=13+(burst*29%63);
+   for(let i=0;i<26;i++){
+     const angle=i*Math.PI*2/26,dist=65+(i%4)*22;
+     const dot=document.createElement('i');dot.className='firework-spark';
+     dot.style.cssText=`left:${x}%;top:${y}%;--dx:${Math.cos(angle)*dist}px;--dy:${Math.sin(angle)*dist}px;--spark:${colors[(i+burst)%colors.length]};animation-delay:${burst*.27}s`;
+     host.appendChild(dot);
+   }
+ }
+ $('continueGame').focus();
+}
+function hideVictory(){const popup=$('victory');if(!popup)return;popup.classList.remove('active');popup.setAttribute('aria-hidden','true');$('victoryFireworks').innerHTML='';}
+$('continueGame').addEventListener('click',hideVictory);
+$('victoryRestart').addEventListener('click',restart);
+function restart(){idleAfterAssemblySeconds=0;$('storkGameover').classList.remove('active');$('storkGameover').setAttribute('aria-hidden','true');$('storkNest').innerHTML='';$('storkNest').style.display='none';placed.clear();wired.clear();selected=null;ctl={};temp=20;pressure=0;level=75;rpm=0;flow=0;volume=0;phase=0;impellerStoppedPhase=0;feedRate=0;coalRate=0;coalTotal=0;stokerTempo='stopped';$('stokerTempo').value='0';updateStokerTempoLabel();feedSetting=0;$('feedSetting').value='0';updateFeedSettingLabel();won=false;lost=false;$('alarm').classList.remove('active');$('pressure').closest('.meter').classList.remove('warning');$('level').closest('.meter').classList.remove('warning');$('gameover').classList.remove('active');hideVictory();$('gameoverReason').textContent='Het waterniveau is tot 10% gedaald. Je hebt verloren.';$('whistleFx').innerHTML='';$('statusMessage').textContent='Plaats de machines en sluit de systemen aan.';
+ [['temp','20 °C'],['pressure','0,0 kg/cm²'],['level','75,0%'],['rpm','0 rpm'],['flow','0 m³/min'],['volume','0,0 m³'],['coalRate','0,0 kg/min'],['coalTotal','0,0 kg']].forEach(([id,value])=>{if($(id))$(id).textContent=value;});
+ if(typeof steamAudio!=='undefined')steamAudio.reset();if($('goal'))$('goal').textContent='Doel: verpomp 500 m³ naar de Maas.';renderStatic();log('Nieuwe puzzel gestart.');updateGuidance()} $('reset').addEventListener('click',restart);$('restartGame').addEventListener('click',restart);$('dashboardMeters').appendChild(document.querySelector('.sidebar .meters'));$('dashboardControls').appendChild($('controls'));const audioSeparator=document.createElement('div');audioSeparator.className='audio-separator';$('dashboardControls').appendChild(audioSeparator);$('status').innerHTML='<span id="statusMessage">'+$('status').textContent+'</span>';$('status').appendChild($('alarm'));const objective=document.createElement('span');objective.id='statusObjective';objective.className='status-objective';$('status').appendChild(objective);$('goal').remove();renderStatic();log('Welkom bij De Tuut. Monteer de zeven componenten en sluit de vier systemen aan. Plaats ook de blackfluit op de ketel (automatisch geïntegreerd).');setInterval(tick,100);requestAnimationFrame(animationFrame);
+
+// Versie 38: uitsluitend haardvuur bij stilstand; duidelijke stoomslagen bij draaiende machine; synthetisch geluid, zonder externe geluidsbestanden.
+// Geluid start uitsluitend na expliciete gebruikersinteractie (iOS / Brave / Safari).
+const steamAudio=(()=>{
+ let context=null,master=null,enabled=false,fireSource=null,fireFilter=null,fireGain=null;
+ let pumpSource=null,pumpGain=null,whistleOsc=null,whistleHarmonic=null,whistleGain=null;
+ let nextStroke=0,strokeCount=0,nextCrackle=0,noiseBuffer=null,machineWasOn=false,lastStrokeAt=-100;
+ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+ function noise(seconds=2){
+   const buffer=context.createBuffer(1,Math.ceil(context.sampleRate*seconds),context.sampleRate);
+   const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
+   return buffer;
+ }
+ function gainTo(node,value,when,seconds=.12){node.gain.cancelScheduledValues(when);node.gain.setTargetAtTime(value,when,seconds)}
+ function init(){
+   if(context)return;
+   const AC=window.AudioContext||window.webkitAudioContext;
+   if(!AC)throw Error('Web Audio wordt niet ondersteund in deze browser.');
+   context=new AC();master=context.createGain();master.gain.value=.48;master.connect(context.destination);
+   noiseBuffer=noise(3);
+   fireSource=context.createBufferSource();fireSource.buffer=noiseBuffer;fireSource.loop=true;
+   fireFilter=context.createBiquadFilter();fireFilter.type='lowpass';fireFilter.frequency.value=1100;
+   fireGain=context.createGain();fireGain.gain.value=0;
+   // Geen doorlopende vuurruis: bij uitsluitend stoken klinkt alleen zacht, afzonderlijk knetteren.
+   fireSource.connect(fireFilter);fireFilter.connect(fireGain);fireGain.connect(master);fireSource.start();
+   // Waterstroom: gefilterde breedbandruis, zonder bromtoon of oscillator.
+   pumpSource=context.createBufferSource();pumpSource.buffer=noiseBuffer;pumpSource.loop=true;
+   const pumpHighpass=context.createBiquadFilter();pumpHighpass.type='highpass';pumpHighpass.frequency.value=260;
+   const pumpFilter=context.createBiquadFilter();pumpFilter.type='lowpass';pumpFilter.frequency.value=2800;
+   pumpGain=context.createGain();pumpGain.gain.value=0;
+   pumpSource.connect(pumpHighpass);pumpHighpass.connect(pumpFilter);pumpFilter.connect(pumpGain);pumpGain.connect(master);pumpSource.start();
+   whistleOsc=context.createOscillator();whistleOsc.type='sine';whistleOsc.frequency.value=950;
+   whistleHarmonic=context.createOscillator();whistleHarmonic.type='sine';whistleHarmonic.frequency.value=1900;
+   whistleGain=context.createGain();whistleGain.gain.value=0;
+   const harmonicGain=context.createGain();harmonicGain.gain.value=.18;
+   whistleOsc.connect(whistleGain);whistleHarmonic.connect(harmonicGain);harmonicGain.connect(whistleGain);whistleGain.connect(master);
+   whistleOsc.start();whistleHarmonic.start();
+ }
+ function steamStroke(at,frequency,volume){
+   if(!context||!noiseBuffer)return;
+   const source=context.createBufferSource();source.buffer=noiseBuffer;
+   const filter=context.createBiquadFilter();filter.type='bandpass';filter.frequency.value=frequency;filter.Q.value=1.1;
+   const env=context.createGain();env.gain.setValueAtTime(.0001,at);env.gain.exponentialRampToValueAtTime(Math.max(.001,volume*3.8),at+.009);env.gain.exponentialRampToValueAtTime(.0001,at+.23);
+   source.connect(filter);filter.connect(env);env.connect(master);source.start(at);source.stop(at+.25);
+   // Korte droge mechanische klap bij iedere omwenteling, zonder voortdurende brom.
+   const click=context.createOscillator();click.type='triangle';click.frequency.setValueAtTime(115,at);click.frequency.exponentialRampToValueAtTime(65,at+.065);
+   const clickGain=context.createGain();clickGain.gain.setValueAtTime(.0001,at);clickGain.gain.exponentialRampToValueAtTime(.36,at+.006);clickGain.gain.exponentialRampToValueAtTime(.0001,at+.09);
+   click.connect(clickGain);clickGain.connect(master);click.start(at);click.stop(at+.10);
+   source.onended=()=>{source.disconnect();filter.disconnect();env.disconnect()};
+   click.onended=()=>{click.disconnect();clickGain.disconnect()};
+ }
+ function coalCrackle(at,intensity){
+   const source=context.createBufferSource();source.buffer=noiseBuffer;
+   const filter=context.createBiquadFilter();filter.type='highpass';filter.frequency.value=750+Math.random()*2100;
+   const env=context.createGain();
+   const peak=.009+intensity*(.016+Math.random()*.014);
+   env.gain.setValueAtTime(.0001,at);
+   env.gain.exponentialRampToValueAtTime(peak,at+.002);
+   env.gain.exponentialRampToValueAtTime(.0001,at+.06+Math.random()*.12);
+   source.connect(filter);filter.connect(env);env.connect(master);
+   source.start(at);source.stop(at+.21);
+   source.onended=()=>{source.disconnect();filter.disconnect();env.disconnect()};
+ }
+ function update(){
+   if(!enabled||!context||context.state!=='running')return;
+   const t=context.currentTime;
+   const firing=lost?0:({stopped:0,slow:.25,medium:.55,fast:1}[stokerTempo]||0);
+   // Geluid van de centrifugaalpomp uitsluitend bij werkelijk verpompen.
+   const machineOn=!lost&&rpm>0&&placed.has('engine');
+   const pumpOn=machineOn&&flow>1&&placed.has('centrifugal')&&wired.has('shaft1')&&wired.has('shaft2')&&wired.has('intake2')&&wired.has('out');
+   const running=machineOn&&pumpOn;
+   // Rustig haardvuur, op de achtergrond zodra het gemaal pompt.
+   const fireDuck=running?.18:machineOn?.32:1;
+   gainTo(fireGain,0,t,.08); // Vuurgeluid uitsluitend als losse knettertikken; nooit continu suizen.
+   fireFilter.frequency.setTargetAtTime(310+firing*320,t,.25);
+   if(firing>0){
+     if(nextCrackle<t-.25)nextCrackle=t;
+     let c=0;
+     while(nextCrackle<t+.09&&c++<3){
+       coalCrackle(Math.max(t+.003,nextCrackle),firing*fireDuck);
+       nextCrackle+=1.1+Math.random()*2.1;
+     }
+   }else nextCrackle=t;
+   // Kenmerkend suizen van stromend water, uitsluitend bij positief pompdebiet.
+   gainTo(pumpGain,pumpOn?(.016+clamp(flow/220,0,1)*.065):0,t,.09);
+   const alarm=!lost&&placed.has('boiler')&&level<20;
+   gainTo(whistleGain,alarm?.15:0,t,.06);
+   if(alarm){const w=950+13*Math.sin(t*12);whistleOsc.frequency.setTargetAtTime(w,t,.03);whistleHarmonic.frequency.setTargetAtTime(w*2,t,.03)}
+   if(!machineOn){nextStroke=t;machineWasOn=false;lastStrokeAt=-100;return}
+   // Eerste hoorbare slag direct bij de eerste zuigerbeweging.
+   // Bij optoeren wordt de tijd tot de volgende slag telkens opnieuw begrensd:
+   // anders blijft een op zeer laag toerental geplande slag vele seconden uit.
+   if(!machineWasOn){nextStroke=t+.005;lastStrokeAt=-100;machineWasOn=true;}
+   // Eén herkenbare mechanische slag per krukasomwenteling, frequentie = rpm / 60.
+   const interval=60/clamp(rpm,0.1,190);
+   if(nextStroke<t-.15)nextStroke=t+.005;
+   if(lastStrokeAt>-50)nextStroke=Math.min(nextStroke,lastStrokeAt+interval);
+   if(nextStroke<t+.07){
+     const at=Math.max(t+.005,nextStroke);
+     steamStroke(at,strokeCount++%2?440:310,.40+rpm/190*.15);
+     lastStrokeAt=at;
+     nextStroke=at+interval;
+   }
+ }
+ function storkClatter(){
+   if(!enabled||!context||context.state!=='running')return;
+   const start=context.currentTime+.045;
+   // Two bouts of beak clattering: short, woody percussive clicks with slight pitch variation.
+   for(let bout=0;bout<3;bout++){
+     const base=start+bout*1.12;
+     for(let j=0;j<10;j++){
+       const at=base+j*(.075+.008*Math.sin(j*2.1));
+       const osc=context.createOscillator();osc.type='triangle';
+       const f=660+Math.random()*230;
+       osc.frequency.setValueAtTime(f,at);
+       osc.frequency.exponentialRampToValueAtTime(f*.48,at+.034);
+       const gain=context.createGain();
+       gain.gain.setValueAtTime(.0001,at);
+       gain.gain.exponentialRampToValueAtTime(.20+Math.random()*.14,at+.002);
+       gain.gain.exponentialRampToValueAtTime(.0001,at+.052);
+       osc.connect(gain);gain.connect(master);osc.start(at);osc.stop(at+.06);
+       osc.onended=()=>{osc.disconnect();gain.disconnect()};
+     }
+   }
+ }
+ function explosion(){
+   // Eenmalig ketelbarst-geluid: droge knal, diepe dreun en afnemend gesis.
+   if(!enabled||!context||context.state!=='running')return;
+   const t=context.currentTime+.012;
+   gainTo(pumpGain,0,t,.012);gainTo(fireGain,0,t,.012);gainTo(whistleGain,0,t,.012);
+   function burst(filterType,frequency,q,peak,attack,decay){
+     const src=context.createBufferSource();src.buffer=noiseBuffer;
+     const filt=context.createBiquadFilter();filt.type=filterType;filt.frequency.value=frequency;filt.Q.value=q;
+     const g=context.createGain();g.gain.setValueAtTime(.0001,t);
+     g.gain.exponentialRampToValueAtTime(peak,t+attack);
+     g.gain.exponentialRampToValueAtTime(.0001,t+decay);
+     src.connect(filt);filt.connect(g);g.connect(master);
+     src.start(t);src.stop(t+decay+.03);
+     src.onended=()=>{src.disconnect();filt.disconnect();g.disconnect()};
+   }
+   burst('lowpass',170,.7,.95,.008,1.35);
+   burst('bandpass',850,.55,.65,.003,.46);
+   burst('highpass',1500,.5,.22,.005,1.8);
+   const boom=context.createOscillator();boom.type='sine';
+   boom.frequency.setValueAtTime(95,t);boom.frequency.exponentialRampToValueAtTime(34,t+.6);
+   const g=context.createGain();g.gain.setValueAtTime(.0001,t);
+   g.gain.exponentialRampToValueAtTime(.7,t+.018);
+   g.gain.exponentialRampToValueAtTime(.0001,t+.85);
+   boom.connect(g);g.connect(master);boom.start(t);boom.stop(t+.9);
+   boom.onended=()=>{boom.disconnect();g.disconnect()};
+ }
+ async function toggle(forceOn=false){
+   try{
+     init();await context.resume();enabled=forceOn?true:!enabled;
+     const btn=document.getElementById('soundToggle');btn.setAttribute('aria-pressed',String(enabled));
+     btn.classList.toggle('on',enabled);
+     if(!enabled){machineWasOn=false;lastStrokeAt=-100;const t=context.currentTime;gainTo(fireGain,0,t,.03);gainTo(pumpGain,0,t,.03);gainTo(whistleGain,0,t,.03)}
+     else {nextStroke=context.currentTime;nextCrackle=context.currentTime;machineWasOn=false;lastStrokeAt=-100;}
+   }catch(e){document.getElementById('soundHint').textContent='Geluid kon niet starten: '+e.message;}
+ }
+ function reset(){machineWasOn=false;lastStrokeAt=-100;nextStroke=context?context.currentTime:0;nextCrackle=nextStroke;if(context){const t=context.currentTime;gainTo(fireGain,0,t,.01);gainTo(pumpGain,0,t,.01);gainTo(whistleGain,0,t,.01);}}
+ return {update,toggle,explosion,reset,storkClatter};
+})();
+const soundButton=document.createElement('button');soundButton.id='soundToggle';soundButton.className='switch-row sound-switch';soundButton.type='button';soundButton.setAttribute('aria-pressed','false');soundButton.innerHTML='<span class="audio-label">Geluid</span><span class="track"></span>';
+const soundHint=document.createElement('p');soundHint.id='soundHint';soundHint.className='audio-note';soundHint.textContent='';
+const dashboardControls=document.getElementById('dashboardControls');dashboardControls.append(soundButton,soundHint);const restartButton=document.getElementById('reset');if(restartButton){dashboardControls.append(restartButton);}
+soundButton.addEventListener('click',e=>{e.stopPropagation();if(!autoSoundStarted){autoSoundStarted=true;steamAudio.toggle(true);}else if(!justAutoStarted){steamAudio.toggle();}justAutoStarted=false;});
+// Browsers require a user gesture to unlock audio. Sound is ON by default and
+// automatically starts on the first click/tap/key press anywhere in the simulator.
+let autoSoundStarted=false,justAutoStarted=false;function autoSoundStart(e){if(autoSoundStarted)return;autoSoundStarted=true;justAutoStarted=!!e.target.closest?.('#soundToggle');steamAudio.toggle(true);}
+document.addEventListener('pointerdown',autoSoundStart,{once:true,capture:true});
+document.addEventListener('keydown',autoSoundStart,{once:true,capture:true});
+setInterval(()=>steamAudio.update(),45);
+
+</script></body></html>
