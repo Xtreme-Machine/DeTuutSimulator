@@ -1,0 +1,1494 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#211c18">
+<title>De Tuut op Stoom · Een natte wacht</title>
+<style>
+:root {
+  color-scheme: dark;
+  --ink: #f5e8d2;
+  --muted: #d4c3a9;
+  --gold: #f0c485;
+  --pale: #f6dbad;
+  --floor: #191714;
+  --panel: #26211c;
+  --surface: #312921;
+  --edge: #6c5845;
+  --water: #a4d4ce;
+  --warn: #ffd1ae;
+  --safe: #b9d6a8;
+  font: 16px/1.45 system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  min-height: 100svh;
+  color: var(--ink);
+  background: radial-gradient(ellipse at 50% 0, #3a2c22, var(--floor) 70%);
+}
+h1, h2, h3, p { margin: 0; }
+h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; }
+button, summary { touch-action: manipulation; }
+button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--edge);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--gold); background: #443629; }
+button:active:not(:disabled) { translate: 0 1px; }
+button:disabled { opacity: .6; cursor: default; }
+:focus-visible { outline: 3px solid #ffdc9f; outline-offset: 3px; }
+button.primary, button[aria-pressed="true"], button[aria-current="location"] {
+  color: #221b13;
+  background: var(--gold);
+  border-color: var(--gold);
+  font-weight: 650;
+}
+button.primary:hover:not(:disabled), button[aria-pressed="true"]:hover:not(:disabled), button[aria-current="location"]:hover:not(:disabled) {
+  background: #ffdb9f;
+}
+.quiet { background: #231f1a; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.wrap { width: min(100%, 1200px); margin: auto; padding: 16px clamp(10px, 3vw, 32px) 22px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+.topbar .options { margin-inline-start: auto; }
+.wordmark { color: var(--pale); font: 500 clamp(1.17rem, 3vw, 1.62rem)/1.05 Georgia, serif; }
+.options, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.options { font-size: .86rem; justify-content: end; }
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: clamp(295px, 43vw, 445px);
+  display: flex;
+  align-items: end;
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  background: #454743;
+}
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 65% 50%; z-index: -2; }
+.hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #161a17f5, #181a16b5 38%, #171b1844 67%, transparent), linear-gradient(0deg, #171715ce, transparent 65%); }
+.hero-intro { padding: clamp(22px, 5vw, 60px); }
+.hero h1 { max-width: 10ch; font-size: clamp(2.85rem, 8vw, 6rem); letter-spacing: -.064em; line-height: .88; }
+.hero p { color: var(--gold); font: 500 clamp(1.15rem, 3vw, 1.8rem)/1.2 Georgia, serif; margin-top: 15px; }
+.duty-heading { margin: 24px 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); }
+.duties { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.duty {
+  text-align: left; min-height: 94px; padding: 12px 15px;
+  display: grid; align-content: center; gap: 4px;
+  background: linear-gradient(122deg, #392e23, #25211b);
+}
+.duty span:first-child { color: var(--gold); font-size: .83rem; }
+.duty strong { font: 500 clamp(1.05rem, 2.1vw, 1.45rem)/1.15 Georgia, serif; }
+.game-head {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center;
+  gap: 12px; padding: 12px 14px;
+  border: 1px solid var(--edge); border-radius: 10px 10px 0 0; background: var(--panel);
+}
+.game-head .duty-name { color: var(--gold); font-size: .83rem; }
+.game-head h1 { font-family: inherit; font-weight: 650; font-size: clamp(1rem, 2.5vw, 1.25rem); line-height: 1.2; }
+.polder { padding: 3px 12px; border-left: 1px solid var(--edge); min-width: 125px; }
+.polder small { display: block; color: var(--muted); font-size: .79rem; }
+.polder strong { color: var(--water); font-size: .93rem; font-variant-numeric: tabular-nums; }
+.stage {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 760 / 405;
+  max-height: 62vh;
+  min-height: 220px;
+  background: #343a35;
+  overflow: hidden;
+  border-inline: 1px solid var(--edge);
+}
+.stage canvas { display: block; width: 100%; height: 100%; }
+.instruments {
+  position: absolute; inset: 10px 10px auto; display: flex; flex-wrap: wrap;
+  align-items: flex-start; gap: 5px; pointer-events: none;
+}
+.reading {
+  padding: 4px 8px;
+  border: 1px solid #cfb58b66;
+  border-radius: 5px;
+  background: #241e18ed;
+  color: var(--ink);
+  font-size: clamp(.74rem, 1.7vw, .91rem);
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 8px #0006;
+}
+.reading.alert { background: #523124; color: #fff0d7; border-color: #ce9b74; }
+.work-tools { position: absolute; inset: 0; pointer-events: none; }
+.hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  min-height: 44px;
+  white-space: nowrap;
+  background: #29221beb;
+  border-color: #cfab79;
+  color: #fff3dc;
+  box-shadow: 0 3px 12px #0008;
+  font-size: clamp(.78rem, 1.85vw, .98rem);
+  padding-inline: clamp(7px, 1.8vw, 13px);
+}
+.hotspot[data-drag], #feed-wheel { touch-action: none; }
+.nav {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 5px; padding: 7px; background: #231e18;
+  border: 1px solid var(--edge);
+}
+.nav button { text-align: center; }
+.nav button span { display: inline-block; }
+.bench {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 14px;
+  align-items: center; padding: 10px 13px; background: var(--panel);
+  border: 1px solid var(--edge); border-top: 0; border-radius: 0 0 10px 10px;
+}
+.bench-content { display: grid; gap: 9px; }
+.bench .actions { gap: 5px; }
+.bench button { font-size: .92rem; }
+.message { min-height: 1.45em; color: var(--pale); font-size: .93rem; }
+.warning { color: var(--warn); font-size: .9rem; border-left: 3px solid #db9b71; padding-left: 8px; }
+.closeup { background: #211c17; color: var(--pale); }
+.overlay {
+  position: fixed; z-index: 5; inset: 0; display: grid; place-items: center; overflow: auto;
+  padding: 16px; background: #14120fc9;
+}
+.dialog {
+  width: min(100%, 500px); display: grid; gap: 13px;
+  padding: clamp(18px, 5vw, 32px); color: var(--ink);
+  border: 1px solid #ab8f68; border-radius: 12px; background: #30271e;
+  box-shadow: 0 16px 60px #0009;
+}
+.dialog h2 { color: var(--pale); font-size: clamp(1.6rem, 6vw, 2.25rem); line-height: 1.07; }
+.dialog p { color: var(--muted); }
+.dialog .outcome { color: var(--safe); font-size: .9rem; }
+.dialog .actions { margin-top: 3px; }
+@media (max-width: 650px) {
+  .topbar { gap: 6px; }
+  .options { gap: 4px; }
+  .options button { padding-inline: 7px; }
+  .duties { grid-template-columns: 1fr; gap: 6px; }
+  .duty { min-height: 64px; }
+  .game-head { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 8px; padding: 8px 10px; }
+  .polder { grid-column: 1; grid-row: 2; border: 0; padding: 0; min-width: 0; }
+  .polder small { display: inline; margin-right: 5px; }
+  .polder strong { font-size: .82rem; }
+  #pause { grid-column: 2; grid-row: 1 / span 2; }
+  .stage { min-height: 235px; max-height: 60vh; }
+  .nav button { padding-inline: 4px; font-size: .9rem; }
+  .bench { grid-template-columns: 1fr; }
+  .bench > .actions { justify-content: end; }
+}
+@media (min-width: 651px) and (max-height: 600px) { .stage { max-height: 56vh; } }
+@media (max-width: 380px) {
+  .wordmark { max-width: 9ch; }
+  .options button { font-size: .79rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  button:active:not(:disabled) { translate: none; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="topbar">
+    <span class="wordmark" id="wordmark" hidden>De Tuut op Stoom</span>
+    <div class="options">
+      <button type="button" id="sound" class="quiet" aria-pressed="false">Geluid uit</button>
+      <button type="button" id="motion" class="quiet" aria-pressed="false">Minder beweging</button>
+    </div>
+  </header>
+  <section id="menu">
+    <div class="hero">
+      <canvas id="cover" width="1000" height="480" aria-hidden="true"></canvas>
+      <div class="hero-intro"><h1>De Tuut op Stoom</h1><p>Een natte wacht</p></div>
+    </div>
+    <h2 class="duty-heading">Kies je dienst</h2>
+    <div class="duties" id="duties"></div>
+  </section>
+  <section id="game" hidden aria-label="De dienst">
+    <header class="game-head">
+      <div><p class="duty-name" id="duty-name"></p><h1 id="goal"></h1></div>
+      <div class="polder"><small>Polderpeil</small><strong id="polder"></strong></div>
+      <button type="button" id="pause" class="quiet" aria-keyshortcuts="Escape">Pauze</button>
+    </header>
+    <div class="stage" id="stage">
+      <canvas id="scene" width="760" height="405" aria-hidden="true"></canvas>
+      <div class="instruments" id="instruments"></div>
+      <div class="work-tools" id="tools" aria-label="Bediening op de werkplek"></div>
+    </div>
+    <nav class="nav" id="places" aria-label="Werkplekken">
+      <button type="button" data-place="grate">Krooshek</button>
+      <button type="button" data-place="boiler">Ketelhuis</button>
+      <button type="button" data-place="machine">Machinekamer</button>
+    </nav>
+    <div class="bench">
+      <div class="bench-content">
+        <div id="bench-controls" class="actions" hidden></div>
+        <p id="warning" class="warning" role="alert" hidden></p>
+        <p id="message" class="message" role="status"></p>
+      </div>
+      <div class="actions">
+        <button type="button" id="help" class="quiet">Hulp</button>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="overlay" class="overlay" hidden>
+  <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <p class="outcome" id="dialog-kicker" hidden></p>
+    <h2 id="dialog-title" tabindex="-1"></h2>
+    <p id="dialog-body"></p>
+    <div class="actions" id="dialog-actions"></div>
+  </section>
+</div>
+<script>
+"use strict";
+const lessons = [
+  { title: "Ruim baan voor het water", intro: "De machine draait, maar buiten komt het water amper door het krooshek. Kijk wat er voor de spijlen ligt.", view: "grate", time: "2–3 min", inflow: 160 },
+  { title: "Houd het gemaal op stoom", intro: "Het vliegwiel draait al. Kijk of er ook water naar de Maas stroomt.", view: "machine", time: "3–4 min", inflow: 161 },
+  { title: "De wacht is van jou", intro: "Het gemaal is koud. Breng de ketel op stoom en bereid intussen de machine voor.", view: "fire", time: "4–6 min", inflow: 162 }
+];
+const zone = { low: 56, high: 72 };
+const debris = [
+  { name: "Riet", resistance: 0.15 },
+  { name: "Tak", resistance: 0.38 },
+  { name: "Blad", resistance: 0.06 }
+];
+const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+const approach = (value, target, rate, dt) => value + (target - value) * Math.min(1, rate * dt);
+const steadyWater = s => s.boiler >= 48 && s.boiler <= 73;
+const clog = s => debris.reduce((total, piece, index) => total + (s.cleared[index] ? 0 : piece.resistance), 0);
+
+function newGame(level) {
+  const cold = level === 2;
+  return {
+    level, time: 0, peil: level === 0 ? 80 : 83, river: 88, flow: 0, inflow: lessons[level].inflow, trend: 0,
+    cleared: level === 0 ? [false, false, false] : [true, true, true], boiler: level === 0 ? 49 : 63,
+    fuel: cold ? 0.06 : level === 0 ? 0.84 : 0.52, heat: cold ? 0.04 : level === 0 ? 0.84 : 0.52,
+    fresh: 0, temperature: cold ? 18 : 165, pressure: cold ? 0 : 9.6, relief: 0, feed: level === 0 ? 0 : 1,
+    valve: !cold, rpm: cold ? 0 : 192, vacuum: cold ? 0 : 0.78, angle: cold ? 0 : 0.65,
+    cooling: true, warm: false, drain: false, cylinder: cold ? 18 : 86, condensate: cold ? 0.27 : 0.04,
+    oil: cold ? 0 : 1, fill: level === 0 ? 1 : 0, venturi: false, scoop: false,
+    airLeak: false, incident: false, repaired: false, repair: 0, checkpoint: null, pumping: 0,
+    waterManaged: false, pressureDip: false, everFilled: level === 0,
+    coalCount: 0, criticalWater: 0, criticalPressure: 0, supportWater: false,
+    check: null, result: "", assisted: false
+  };
+}
+
+function preflight(s) {
+  if (s.pressure < 5.5) return "De druk is nog te laag. Kijk naar de ketel.";
+  if (s.boiler < 25) return "Het ketelwater staat te laag. Vraag de collega te helpen.";
+  if (s.cylinder < 60) return "De cilinder is nog koud. Open de voorwarming.";
+  if (s.condensate > 0.14) return "Er zit nog water in de cilinder. Open de condenswaterkraan.";
+  if (s.warm || s.drain) return "Sluit de voorwarming en de condenswaterkraan vóór het starten.";
+  if (s.oil < 0.3) return "Smeer de machine vóór je start.";
+  if (Math.abs(Math.sin(s.angle)) < 0.18) return "Het wiel staat op een dood punt. Torn het een stukje.";
+  return "";
+}
+
+function updateBoiler(s, dt) {
+  if (s.level === 0) s.fuel = approach(s.fuel, 0.87, 0.22, dt);
+  s.fresh = Math.max(0, s.fresh - 0.052 * dt);
+  if (s.level > 0) s.fuel = Math.max(0.035, s.fuel - (0.00020 + 0.00045 * s.heat) * dt);
+  const smother = clamp((s.fresh - 0.53) * 3, 0, 0.62);
+  s.heat = approach(s.heat, s.fuel * (1 - smother), 1.1, dt);
+  if (s.supportWater) {
+    s.boiler = Math.min(49, s.boiler + 5 * dt);
+    s.supportWater = s.boiler < 49;
+  }
+  if (s.temperature < 100) {
+    s.temperature = clamp(s.temperature + (11 * s.heat - 0.013 * (s.temperature - 18)) * dt, 18, 100);
+    return;
+  }
+  const load = s.flow / 220;
+  const steam = s.valve ? 0.21 + 0.48 * load : 0;
+  const warming = s.warm ? 0.105 : 0;
+  const ejector = s.venturi && s.pressure >= 3.5 ? 0.15 : 0;
+  const release = clamp((s.pressure - 11.5) * 1.4, 0, 0.88);
+  s.relief = release;
+  const generation = 1.11 * s.heat * clamp(s.boiler / 20, 0, 1);
+  s.pressure = clamp(s.pressure + (generation - steam - warming - ejector - release - 0.015 * s.pressure) * dt, 0, 16);
+  s.temperature = approach(s.temperature, 100 + s.pressure * 6, 0.45, dt);
+  const waterUsed = 0.08 * s.heat + 0.27 * (steam + warming + ejector) + 0.17 * release;
+  const feed = [0, 0.257, 2.25][s.feed] * clamp(s.rpm / 174, 0, 1.08);
+  s.boiler = clamp(s.boiler + (feed - waterUsed) * dt, 0, 98);
+  if (s.level < 2 && s.boiler < 31) {
+    s.boiler = Math.max(31, s.boiler);
+    s.assisted = true;
+  }
+}
+
+function updateMachine(s, dt) {
+  const heating = (s.warm || s.valve) && s.pressure >= 1.2;
+  s.cylinder = approach(s.cylinder, heating ? 98 : 18, heating ? 0.225 : 0.0022, dt);
+  if (heating && s.cylinder < 72) s.condensate += dt * (72 - s.cylinder) / 1250;
+  if (s.drain) s.condensate -= 0.21 * dt;
+  s.condensate = clamp(s.condensate, 0, 1);
+  const coolingEffect = s.cooling && s.rpm > 10 ? 0.84 * clamp(s.rpm / 125, 0, 1) : 0;
+  s.vacuum = approach(s.vacuum, coolingEffect, 0.34, dt);
+  const steamPower = clamp((s.pressure - 3.0) / 5.2, 0, 1);
+  const target = s.valve ? steamPower * (146 + 69 * s.vacuum) * (1 - 0.14 * s.flow / 220)
+    * (s.boiler > 91 ? 0.88 : 1) : 0;
+  s.rpm = approach(s.rpm, target, target ? 0.86 : 1.55, dt);
+  if (s.rpm < 1) s.rpm = 0;
+  s.angle = (s.angle + s.rpm * Math.PI / 30 * dt) % (Math.PI * 2);
+  if (s.valve && s.level === 2) s.oil = Math.max(0.34, s.oil - 0.0012 * dt);
+}
+
+function updatePump(s, dt) {
+  if (s.venturi && s.pressure >= 3.5) s.fill += 0.23 * dt;
+  if (s.airLeak) s.fill -= 0.21 * dt;
+  s.fill = clamp(s.fill, 0, 1);
+  const requiredHead = Math.max(1.35, 2.13 + (s.river - 64) * 0.015 + (64 - s.peil) * 0.065);
+  const availableHead = 4.65 * (s.rpm / 200) ** 2;
+  const capacity = Math.min(245, 220 * Math.sqrt(Math.max(0, availableHead - requiredHead) / 2.4));
+  s.flow = s.fill >= 0.96 && s.rpm > 1 ? capacity * (1 - clog(s)) : 0;
+  s.everFilled ||= s.flow > 0;
+  s.trend = approach(s.trend, (s.inflow - s.flow) * 0.018, 1.35, dt);
+  s.peil = clamp(s.peil + (s.inflow - s.flow) * dt * 0.018, 0, 142);
+}
+
+function inZone(s) {
+  return s.peil >= zone.low && s.peil <= zone.high;
+}
+
+function canFinish(s) {
+  if (!s.valve || !s.flow || !inZone(s) || !steadyWater(s) || s.pressure < 7.8 || s.pressure >= 12.5 || s.venturi || s.feed !== 1) return false;
+  if (s.level === 0) return clog(s) <= 0.061 && s.waterManaged;
+  if (s.level === 1) return s.everFilled && s.coalCount > 0;
+  return s.repaired;
+}
+
+function tick(s, dt) {
+  if (s.result) return;
+  s.time += dt;
+  updateBoiler(s, dt);
+  updateMachine(s, dt);
+  updatePump(s, dt);
+  s.pumping = s.flow > 0 ? s.pumping + dt : 0;
+  s.pressureDip ||= s.everFilled && s.pressure < 8.3;
+  if (s.repair > 0) {
+    s.repair -= dt;
+    if (s.repair <= 0) {
+      s.airLeak = false;
+      s.repaired = true;
+    }
+  }
+  if (s.level === 2 && !s.incident && s.pumping >= 12 && inZone(s) && s.valve && s.pressure >= 7.8 && steadyWater(s)) {
+    s.checkpoint = { ...s, cleared: s.cleared.slice(), check: null };
+    s.incident = true;
+    s.airLeak = true;
+  }
+  s.criticalWater = s.boiler < 23 && s.heat > 0.25 ? s.criticalWater + dt : 0;
+  s.criticalPressure = s.pressure > 13.4 ? s.criticalPressure + dt : 0;
+  if (s.level === 2 && (s.criticalWater >= 12 || s.criticalPressure >= 10)) {
+    s.result = s.criticalWater >= 12 ? "water" : "pressure";
+    s.valve = false;
+    s.venturi = false;
+    return;
+  }
+  if (!canFinish(s)) {
+    s.check = null;
+    return;
+  }
+  s.check ??= { time: 0, low: s.peil, high: s.peil };
+  s.check.low = Math.min(s.check.low, s.peil);
+  s.check.high = Math.max(s.check.high, s.peil);
+  if (s.check.high - s.check.low > 1) s.check = { time: 0, low: s.peil, high: s.peil };
+  else s.check.time += dt;
+  if (s.check.time >= 5) s.result = "success";
+}
+
+function act(s, action, value) {
+  switch (action) {
+    case "rake":
+      if (s.cleared[value]) return "";
+      s.cleared[value] = true;
+      if (clog(s) <= 0.061) return "Er stroomt weer genoeg water door het hek.";
+      return value === 1 ? "De tak is los. Er stroomt veel meer water door de spijlen." : "Het vuil is los. Er stroomt wat meer water door.";
+    case "scoop":
+      s.scoop = !s.scoop;
+      return s.scoop ? "De schep is vol. Breng de kolen naar de vuurdeur." : "Je hebt de schep teruggelegd.";
+    case "coal":
+      if (!s.scoop) return "Vul eerst de schep bij de kolenhoop.";
+      s.scoop = false;
+      s.coalCount++;
+      s.fuel = clamp(s.fuel + 0.24, 0, 1);
+      s.fresh = clamp(s.fresh + 0.24, 0, 0.95);
+      return s.fresh > 0.56 ? "Veel verse kolen. Geef het vuur de tijd om aan te trekken." : "De kolen liggen op het vuur. De druk reageert geleidelijk.";
+    case "feed":
+      if (value === 1 && steadyWater(s)) s.waterManaged = true;
+      s.feed = value;
+      return ["Voeding dicht. De draaiende machine verbruikt nog stoom.", "Voeding op Normaal. Blijf het peilglas volgen.", s.rpm ? "Bijvullen. Kijk hoe het peil in het glas stijgt." : "De voeding staat open. De voedingspomp werkt zodra de machine draait."][value];
+    case "helpWater":
+      if (s.valve || s.rpm || s.boiler >= 30) return "";
+      s.supportWater = true;
+      return "De collega helpt met het ketelwater. Volg de waterlijn in het peilglas.";
+    case "venturi":
+      if (!s.venturi && (!s.valve || s.pressure < 3.5)) return "Laat de machine eerst draaien met voldoende stoomdruk.";
+      s.venturi = !s.venturi;
+      return s.venturi ? "De venturi zuigt lucht uit de pomp. Volg het pompglas." : s.fill < 0.96 ? "De venturi is dicht. Je kunt de pomp verder vullen." : "De venturi is dicht en de pomp is gevuld.";
+    case "warm":
+      s.warm = !s.warm;
+      return s.warm ? "De cilinder warmt op zodra er stoom beschikbaar is." : "Voorwarming dicht.";
+    case "drain":
+      s.drain = !s.drain;
+      return s.drain ? "Condenswater kan uit de cilinder." : "Condenswaterkraan dicht.";
+    case "oil":
+      s.oil = 1;
+      return "De machine is gesmeerd.";
+    case "turn":
+      if (s.rpm || s.valve) return "Wacht tot het wiel stilstaat.";
+      s.angle = (s.angle + 0.65) % (Math.PI * 2);
+      return "Het vliegwiel is een stukje verzet.";
+    case "machine":
+      if (s.valve) {
+        s.valve = false;
+        s.venturi = false;
+        return "De stoomtoevoer is dicht. Het wiel loopt uit.";
+      }
+      if (s.repair > 0) return "Wacht tot de collega klaar is met de reparatie.";
+      if (s.rpm) return "Wacht tot het wiel stilstaat.";
+      if (s.level === 2) {
+        const problem = preflight(s);
+        if (problem) return problem;
+      } else if (s.pressure < 5.5) return "Wacht tot er voldoende stoomdruk is.";
+      s.valve = true;
+      return "De hoofdstoomkraan staat open. De machine komt op gang.";
+    case "repair":
+      if (s.valve || s.rpm) return "De collega kan bij stilstand het lek dichten.";
+      if (!s.airLeak || s.repair > 0) return "";
+      s.repair = 4;
+      return "De collega dicht het lek. Blijf even bij de machine.";
+    default:
+      return "";
+  }
+}
+function createArtwork(scene, cover) {
+  let ctx = scene.getContext("2d");
+  const canvas = scene;
+  const reducedMotion = { matches: false };
+  let time = 0;
+  let state;
+  let lifting;
+  let drag;
+  let scoopButton;
+  let rakeButtons = [];
+  const debrisPositions = [258, 388, 516];
+
+  function rect(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
+  }
+
+  function shape(points, color) {
+    ctx.beginPath();
+    ctx.moveTo(...points[0]);
+    for (const point of points.slice(1)) ctx.lineTo(...point);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function line(points, color, width = 2) {
+    ctx.beginPath();
+    ctx.moveTo(...points[0]);
+    for (const point of points.slice(1)) ctx.lineTo(...point);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+    ctx.stroke();
+  }
+
+  function ellipse(x, y, rx, ry, color) {
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function gradient(x1, y1, x2, y2, colors) {
+    const paint = ctx.createLinearGradient(x1, y1, x2, y2);
+    colors.forEach((color, index) => paint.addColorStop(index / (colors.length - 1), color));
+    return paint;
+  }
+
+  function brickWall() {
+    rect(0, 0, 760, 405, "#5b3e32");
+    for (let row = 0; row < 12; row++) {
+      for (let col = -1; col < 14; col++) {
+        const x = col * 63 + (row % 2) * 31;
+        const y = row * 34;
+        rect(x + 2, y + 2, 59, 30, ["#654838", "#76523e", "#6d4a39", "#805a44", "#573c31"][(row * 3 + col + 6) % 5]);
+        line([[x + 3, y + 28], [x + 58, y + 28]], "#4e372d", 2);
+      }
+    }
+    rect(0, 328, 760, 77, gradient(0, 328, 0, 405, ["#463b30", "#29251f"]));
+    line([[0, 328], [760, 328]], "#322b23", 4);
+  }
+
+  function plate(x, y, w, h) {
+    rect(x, y, w, h, gradient(x, y, x + w, y + h, ["#696653", "#363a32", "#232923"]));
+    line([[x, y + h], [x, y], [x + w, y]], "#99927c", 3);
+    for (const dx of [12, w - 12]) for (const dy of [12, h - 12]) {
+      ellipse(x + dx, y + dy, 4, 4, "#aaa28a");
+      ellipse(x + dx + 1, y + dy + 1, 2, 2, "#514c3d");
+    }
+  }
+
+  function gauge(x, y, value) {
+    ellipse(x, y + 2, 53, 53, "#25231b");
+    ellipse(x, y, 51, 51, gradient(x - 45, y - 40, x + 45, y + 42, ["#d6ae68", "#684b2c", "#a97945"]));
+    ellipse(x, y, 43, 43, "#e2cba0");
+    for (let i = 0; i < 11; i++) {
+      const a = Math.PI * (0.78 + 1.44 * i / 10);
+      line([[x + Math.cos(a) * 36, y + Math.sin(a) * 36], [x + Math.cos(a) * 41, y + Math.sin(a) * 41]], "#4a3927");
+    }
+    const a = Math.PI * (0.78 + 1.44 * value / 100);
+    line([[x, y], [x + Math.cos(a) * 33, y + Math.sin(a) * 33]], "#a83e2b", 3);
+    ellipse(x, y, 5, 5, "#44342a");
+  }
+
+  function coal(x, y, size, color) {
+    shape([[x-size, y+size/2], [x-size*.65, y-size*.5], [x+size*.2, y-size*.75], [x+size, y-size*.12], [x+size*.66, y+size*.67]], color);
+    shape([[x-size*.65, y-size*.5], [x+size*.2, y-size*.75], [x+size*.68, y-size*.14], [x-size*.35, y-size*.18]], "#62584d");
+  }
+
+  function drawFire() {
+    brickWall();
+    plate(245, 66, 420, 265);
+    ctx.beginPath();
+    ctx.roundRect(299, 132, 233, 162, [71, 71, 15, 15]);
+    ctx.fillStyle = "#99835a";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(310, 143, 211, 141, [66, 66, 9, 9]);
+    ctx.fillStyle = "#251b19";
+    ctx.fill();
+    ctx.save();
+    ctx.clip();
+    const light = ctx.createRadialGradient(420, 280, 6, 420, 267, 125);
+    light.addColorStop(0, "#f19b4f");
+    light.addColorStop(0.48, "#a74227");
+    light.addColorStop(1, "#261919");
+    ctx.globalAlpha = 0.4 + state.heat / 170;
+    rect(305, 141, 222, 148, light);
+    for (let i = 0; i < 11; i++) {
+      const flicker = reducedMotion.matches ? 0 : Math.sin(time * 9 + i * 1.6) * 8;
+      const x = 321 + i * 19;
+      const height = 18 + state.heat * (0.52 + (i % 4) * 0.16) + flicker;
+      ctx.beginPath();
+      ctx.moveTo(x - 14, 281);
+      ctx.quadraticCurveTo(x - 28, 265 - height / 2, x - 1, 277 - height);
+      ctx.quadraticCurveTo(x - 5, 266 - height / 2, x + 12, 270 - height / 3);
+      ctx.quadraticCurveTo(x + 24, 260, x + 17, 281);
+      ctx.fillStyle = i % 2 ? "#ffc475" : "#ef7935";
+      ctx.fill();
+    }
+    ctx.restore();
+    for (let i = 0; i < 9; i++) coal(323 + i * 21, 281 - (i % 3) * 3, 14, i < state.fuel / 12 ? "#41302a" : "#6b3a2c");
+    gauge(589, 128, state.pressure);
+    line([[583, 221], [622, 221], [622, 253]], "#ab8c5f", 9);
+    ellipse(146, 333, 104, 16, "#211d19");
+    for (let i = 0; i < 29; i++) {
+      const row = Math.floor(i / 9);
+      coal(63 + (i % 9) * 20 + row * 9, 324 - row * 13, 10 + i % 5, "#35302c");
+    }
+    const toss = time - state.coalAt;
+    const dragging = drag.target === scoopButton && drag.id !== null && drag.moved;
+    if (dragging || state.loaded || (toss < 0.52 && !reducedMotion.matches)) {
+      const travel = state.loaded ? 0 : toss / 0.52;
+      const bounds = dragging ? canvas.getBoundingClientRect() : null;
+      const x = dragging ? (drag.x - bounds.left) * 760 / bounds.width : 181 + 233 * travel;
+      const y = dragging ? (drag.y - bounds.top) * 405 / bounds.height - 23 : 275 - Math.sin(Math.PI * travel) * 77;
+      line([[x - 70, y + 31], [x + 4, y]], "#b9945e", 8);
+      shape([[x - 8, y + 7], [x + 33, y - 8], [x + 36, y + 6], [x + 7, y + 18]], "#98988b");
+      coal(x + 16, y + 1, 12, "#292724");
+      coal(x + 29, y - 3, 8, "#413630");
+    }
+  }
+
+  function drawWater() {
+    brickWall();
+    plate(288, 36, 267, 309);
+    line([[0, 272], [201, 272], [201, 317], [464, 317], [464, 291]], "#211f1c", 25);
+    line([[0, 266], [201, 266], [201, 311], [464, 311], [464, 291]], "#ad8053", 16);
+    line([[0, 261], [200, 261]], state.valve ? "#c9e4df" : "#d6a470", 3);
+    line([[406, 87], [464, 87], [464, 121]], "#c6a264", 15);
+    for (const y of [109, 283]) {
+      rect(428, y - 10, 73, 19, gradient(428, y, 501, y, ["#775333", "#efcd89", "#8f6139"]));
+    }
+    rect(443, 118, 44, 157, "#181c1a");
+    rect(451, 120, 27, 152, "#424b40");
+    const height = state.water * 1.52;
+    rect(451, 272 - height, 27, height, gradient(451, 270, 479, 116, ["#365f66", "#7db6b1", "#b0d1bd"]));
+    line([[452, 272 - height], [477, 272 - height]], "#dceede", 2);
+    line([[455, 122], [455, 270]], "#b0bbb0a2", 2);
+    for (const level of [48, 73]) {
+      const y = 272 - level * 1.52;
+      line([[487, y], [511, y]], "#f2d28f", 3);
+    }
+    ellipse(201, 190, 64, 64, "#221f1a");
+    ellipse(201, 188, 61, 61, "#a5583d");
+    ellipse(201, 188, 51, 51, "#302923");
+    for (let i = 0; i < 6; i++) {
+      const a = state.wheelAngle + i * Math.PI / 3;
+      line([[201, 188], [201 + 51 * Math.cos(a), 188 + 51 * Math.sin(a)]], "#c87850", 10);
+    }
+    ellipse(201, 188, 15, 15, "#d49e6b");
+    ellipse(201, 188, 7, 7, "#654e35");
+  }
+
+  function drawDebris(index, x, y) {
+    if (index === 1) {
+      line([[x-42, y+10], [x+42, y-11]], "#372e21", 17);
+      line([[x-42, y+7], [x+40, y-14]], "#876648", 8);
+      line([[x+2, y-4], [x+21, y-29]], "#987352", 6);
+      return;
+    }
+    for (let i = 0; i < 11; i++) {
+      const dx = i * 7 - 36;
+      if (index === 0) {
+        line([[x+dx, y+7], [x+dx+12, y-20-(i%3)*5]], i % 2 ? "#a99151" : "#6c7546", 4);
+      } else {
+        ellipse(x+dx, y-(i%3)*10, 12, 6, ["#8b623e", "#b88b50", "#6c6e45"][i%3]);
+      }
+    }
+  }
+
+  function drawGrate() {
+    rect(0, 0, 760, 405, gradient(0, 0, 0, 405, ["#526865", "#a0afa0", "#465c50"]));
+    shape([[0, 131], [760, 111], [760, 242], [0, 249]], "#58654c");
+    shape([[0, 160], [213, 158], [166, 405], [0, 405]], "#6a6f51");
+    shape([[632, 154], [760, 147], [760, 405], [707, 405]], "#747359");
+    const waterline = 253 + state.waterFlow * 21;
+    shape([[208, 183], [635, 175], [706, 405], [157, 405]], gradient(0, 181, 0, 405, ["#657e73", "#334f4e", "#547970"]));
+    for (let i = 0; i < 17; i++) {
+      const phase = reducedMotion.matches ? 0 : time * 35 * state.waterFlow;
+      const y = waterline + ((i * 19 + phase) % (405 - waterline));
+      const x = 186 + (i * 131 % 459);
+      line([[x, y], [x + 14 + state.waterFlow * 22, y + 3]], i % 3 ? "#a6bca1a1" : "#d2e2c0ab", 2);
+    }
+    shape([[123, 126], [648, 124], [694, 161], [147, 174]], "#b0a187");
+    shape([[147, 174], [694, 161], [694, 185], [147, 200]], "#776d5d");
+    for (let i = 0; i < 18; i++) {
+      const x = 175 + i * 26;
+      line([[x, 192], [x + 1, waterline + 24]], "#292e28", 8);
+      line([[x-2, 195], [x-2, waterline+17]], "#7a8372", 2);
+    }
+    line([[172, 219], [627, 208]], "#444a3e", 5);
+    line([[174, waterline + 16], [629, waterline + 10]], "#a6b89e", 2);
+    for (let i = 0; i < 3; i++) {
+      const liftingTime = time - lifting.at;
+      const dragging = drag.target === rakeButtons[i] && drag.id !== null && drag.moved;
+      const rising = state.cleared[i] && lifting.index === i && liftingTime < 0.6 && !reducedMotion.matches;
+      if (dragging || rising) {
+        const x = debrisPositions[i];
+        const rise = dragging ? Math.min(110, Math.max(0, (drag.startY - drag.y) * 1.6)) : 126 * liftingTime / 0.6;
+        const y = waterline - 13 - rise;
+        line([[x+105, y-96], [x, y-4]], "#c0935f", 7);
+        line([[x-36, y-6], [x+33, y-6]], "#403e37", 6);
+        for (let j = -3; j <= 3; j++) line([[x+j*9, y-7], [x+j*9-2, y+7]], "#474942", 3);
+        drawDebris(i, x, y);
+      } else if (!state.cleared[i]) drawDebris(i, debrisPositions[i], waterline - 13);
+      else drawDebris(i, 108 + i * 69, 152 - i * 2);
+    }
+  }
+
+  function machine(s) {
+    brickWall();
+    const windowLight = gradient(0, 40, 0, 205, ["#5b746e", "#b2b6a0"]);
+    for (const x of [32, 565]) {
+      rect(x-5, 39, 112, 157, "#40362b");
+      rect(x, 44, 102, 145, windowLight);
+      for (let j = 0; j < 14; j++) {
+        const y = (j * 43 + (reducedMotion.matches ? 0 : time * 64)) % 128;
+        const stripe = x + (j * 17) % 97;
+        line([[stripe, 46+y], [stripe-3, 52+y]], "#d2dab0a6", 1);
+      }
+      rect(x+49, 44, 5, 145, "#716d52");
+      rect(x, 106, 102, 4, "#716d52");
+    }
+    ctx.save();
+    ctx.globalAlpha = .30;
+    shape([[40, 186], [125, 187], [381, 405], [183, 405]], "#9a9b68");
+    ctx.restore();
+    line([[58, 217], [58, 110], [188, 110], [188, 50], [493, 50], [493, 135]], "#322921", 23);
+    line([[58, 217], [58, 108], [188, 108], [188, 49], [493, 49], [493, 135]], "#ae8b57", 13);
+    line([[52, 208], [52, 117], [176, 117]], "#e1bc7d", 2);
+    plate(74, 298, 588, 54);
+    rect(83, 279, 303, 25, "#343f34");
+    plate(89, 206, 136, 67);
+    rect(99, 222, 116, 32, gradient(99, 222, 99, 254, ["#292e27", "#5d6954", "#292e27"]));
+    const angle = reducedMotion.matches && s.rpm > 1 ? 0.65 : s.angle;
+    const wx = 323;
+    const wy = 199;
+    ellipse(wx, wy+3, 91, 91, "#252721");
+    ellipse(wx, wy, 88, 88, gradient(240, 119, 402, 290, ["#6d785f", "#282f27", "#535f4e"]));
+    ellipse(wx, wy, 75, 75, "#302e24");
+    for (let spoke = 0; spoke < 7; spoke++) {
+      const a = angle + spoke * Math.PI * 2 / 7;
+      const hx = wx + Math.cos(a) * 72;
+      const hy = wy + Math.sin(a) * 72;
+      line([[wx, wy], [hx, hy]], "#718068", 10);
+      line([[wx, wy-4], [hx, hy-4]], "#93977a", 2);
+    }
+    ellipse(wx, wy, 19, 19, "#a4a487");
+    ellipse(wx, wy, 12, 12, "#504b38");
+    const pin = [wx + Math.cos(angle)*28, wy + Math.sin(angle)*28];
+    line([[145+Math.cos(angle)*20, 234], pin], "#25241a", 16);
+    line([[145+Math.cos(angle)*20, 231], pin], "#b7a980", 10);
+    ellipse(pin[0], pin[1], 7, 7, "#d4ba85");
+    line([[412, 231], [466, 231]], "#a19d82", 18);
+    line([[436, 301], [436, 242], [522, 242], [522, 308], [714, 308]], "#282e27", 33);
+    line([[436, 301], [436, 242], [522, 242], [522, 308], [714, 308]], "#6c8172", 22);
+    ellipse(476, 240, 56, 56, "#2a3029");
+    ellipse(476, 237, 51, 51, gradient(443, 192, 520, 281, ["#9cac87", "#586d5b", "#344338"]));
+    ellipse(476, 237, 30, 30, "#53685a");
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      ellipse(476+Math.cos(a)*43, 237+Math.sin(a)*43, 3.5, 3.5, "#acae8c");
+    }
+    line([[535, 126], [535, 184], [499, 184]], "#b99468", 8);
+    rect(541, 115, 32, 139, "#242c26");
+    rect(549, 125, 16, 119, "#48534a");
+    const fill = 119 * s.fill;
+    rect(549, 244-fill, 16, fill, gradient(549, 244, 565, 125, ["#436d67", "#bad5be"]));
+    line([[550, 244-fill], [564, 244-fill]], "#d2eee0", 2);
+    for (const y of [118, 249]) rect(538, y-5, 38, 9, "#be9e68");
+    if (s.venturi) line([[490, 68], [535, 68], [535, 122]], "#f1c797", 3);
+    if (s.airLeak) {
+      const pulse = reducedMotion.matches ? .55 : (Math.sin(time * 8) + 1) / 2;
+      ellipse(614, 299, 9 + pulse * 6, 5 + pulse * 3, "#c4d7c2a6");
+      line([[614, 297], [606, 306], [617, 310]], "#252922", 3);
+    }
+    if (s.flow > 0) {
+      for (let i = 0; i < 6; i++) {
+        const x = 532 + (i * 32 + (reducedMotion.matches ? 0 : time * 0.32 * s.flow)) % 172;
+        line([[x, 307], [x+10, 307]], "#b2cdb2", 2);
+      }
+    }
+    rect(62, 352, 657, 12, "#242721");
+    for (let i = 0; i < 11; i++) rect(78+i*56, 360, 31, 3, "#6b5b43");
+  }
+
+  function paintCover() {
+    ctx = cover.getContext("2d");
+    rect(0, 0, 1000, 480, gradient(0, 0, 0, 480, ["#536868", "#a6aaa0", "#697c69"]));
+    ellipse(764, 133, 174, 98, "#b2b5a090");
+    for (let i = 0; i < 15; i++) {
+      const x = 10 + i * 74;
+      const height = 26 + i * 43 % 63;
+      line([[x, 314], [x-9, 310-height]], "#525c50", 3);
+      ellipse(x, 301-height, 19+i%5*2, height*.39, "#667062");
+    }
+    shape([[0, 288], [535, 273], [1000, 276], [1000, 480], [0, 480]], "#57644f");
+    shape([[0, 391], [392, 342], [881, 344], [1000, 408], [1000, 480], [0, 480]], gradient(0, 340, 0, 480, ["#6f8175", "#3f5e59", "#293c38"]));
+    shape([[391, 324], [887, 314], [964, 364], [332, 380]], "#787666");
+    rect(841, 78, 38, 245, gradient(841, 0, 880, 0, ["#89654e", "#694e3d", "#49382e"]));
+    rect(837, 73, 46, 9, "#9c8063");
+    for (let j = 0; j < 17; j++) line([[844, 84+j*14], [874, 84+j*14]], "#4f4537", 1.5);
+    for (let j = 0; j < 6; j++) ellipse(863+j*17, 64-j*7, 25+j*7, 8+j*2, "#5d6c65a6");
+    shape([[419, 180], [736, 179], [839, 232], [839, 340], [419, 352]], gradient(419, 180, 839, 340, ["#a28265", "#89614d", "#5e493b"]));
+    shape([[398, 182], [567, 121], [758, 178], [743, 198], [427, 207]], gradient(410, 139, 742, 192, ["#5f5a4c", "#343b34"]));
+    shape([[743, 178], [855, 231], [829, 241], [725, 200]], "#34392f");
+    for (let j = 0; j < 13; j++) {
+      const y = 217 + j*10;
+      line([[426, y+1], [734, y-4]], "#58473a", 1.5);
+      for (let x = 429+j%2*18; x < 731; x += 34) line([[x, y-7], [x, y+1]], "#655142", 1);
+    }
+    for (const x of [453, 542, 634, 755]) {
+      rect(x-4, 229, 53, 99, "#594737");
+      ctx.beginPath();
+      ctx.roundRect(x, 230, 44, 90, [20, 20, 0, 0]);
+      ctx.fillStyle = gradient(x, 230, x+44, 319, ["#c6b57b", "#d3a75e", "#886241"]);
+      ctx.fill();
+      line([[x+22, 235], [x+22, 318]], "#634a33", 4);
+      for (const y of [260, 289]) line([[x+1, y], [x+43, y]], "#634a33", 4);
+    }
+    for (let j = 0; j < 110; j++) {
+      const x = (j * 379) % 1000;
+      const y = (j * 113) % 420;
+      line([[x, y], [x-4, y+10]], "#cccfb53d", 1);
+    }
+    for (let j = 0; j < 46; j++) {
+      const x = (j * 173) % 1000;
+      const y = 397 + (j * 17) % 80;
+      line([[x, y], [x+11+j%9, y]], j%5 ? "#a4b5a065" : "#d3ab7490", 2);
+    }
+    ctx = scene.getContext("2d");
+  }
+
+  paintCover();
+  return function renderArt(s, view, visual) {
+    reducedMotion.matches = visual.reduced;
+    time = s.time;
+    state = {
+      heat: 100*s.heat, fuel: 100*s.fuel, pressure: 100*s.pressure/14,
+      loaded: s.scoop, coalAt: visual.coalAt, water: s.boiler, wheelAngle: (s.feed-1)*0.7,
+      cleared: s.cleared, waterFlow: clamp(s.flow/220, 0, 1)
+    };
+    lifting = visual.lifting;
+    drag = visual.drag;
+    scoopButton = visual.scoopButton;
+    rakeButtons = visual.rakeButtons;
+    if (view === "fire") drawFire();
+    else if (view === "water") drawWater();
+    else if (view === "machine") machine(s);
+    else {
+      drawGrate();
+      const waterY = 90 + clamp((142-s.peil)*1.1, 0, 108);
+      rect(113, 90, 10, 133, "#a4aa87");
+      for (let j = 0; j < 9; j++) line([[116, 97+j*14], [122, 97+j*14]], "#3c4c3c", 1);
+      line([[106, waterY], [135, waterY]], "#ced7aa", 3);
+      if (!reducedMotion.matches) {
+        for (let i = 0; i < 29; i++) {
+          const y = (i * 113 + s.time * 52) % 405;
+          const x = (i * 197 % 760);
+          line([[x, y], [x-3, y+8]], "#e4ead94b", 1);
+        }
+      }
+    }
+    const shade = ctx.createRadialGradient(395, 189, 95, 392, 189, 444);
+    shade.addColorStop(0, "#14161300");
+    shade.addColorStop(1, "#1416137a");
+    rect(0, 0, 760, 405, shade);
+  };
+}
+const ui = Object.fromEntries(Array.from(document.querySelectorAll("[id]"), node => [node.id, node]));
+const places = Array.from(ui.places.querySelectorAll("[data-place]"));
+const lessMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const format = new Intl.NumberFormat("nl-NL", { maximumFractionDigits: 1 });
+const art = createArtwork(ui.scene, ui.cover);
+const storageKey = "de-tuut-een-natte-wacht-v2";
+const preferences = loadPreferences();
+const visual = {
+  reduced: false, coalAt: -100, lifting: { index: -1, at: -100 },
+  drag: { id: null, target: null, startX: 0, startY: 0, x: 0, y: 0, moved: false },
+  scoopButton: null, rakeButtons: []
+};
+let s = null;
+let mode = "menu";
+let view = "grate";
+let hints = { key: "", index: 0 };
+let lastFrame = performance.now();
+let lastDraw = 0;
+let remainder = 0;
+let ignoreClick = null;
+let soundscape = null;
+let modalOrigin = null;
+
+function loadPreferences() {
+  try {
+    const data = JSON.parse(localStorage.getItem(storageKey));
+    return { sound: data?.sound === true, reduced: data?.reduced === true,
+      completed: Array.isArray(data?.completed) ? data.completed.filter(level => Number.isInteger(level) && level >= 0 && level < lessons.length) : [] };
+  } catch {
+    return { sound: false, reduced: false, completed: [] };
+  }
+}
+
+function savePreferences() {
+  try { localStorage.setItem(storageKey, JSON.stringify(preferences)); } catch { /* Play remains available. */ }
+}
+
+function setText(node, text) {
+  if (node.textContent !== text) node.textContent = text;
+}
+
+function makeButton(label, onClick, className = "") {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = className;
+  button.textContent = label;
+  if (onClick) button.addEventListener("click", onClick);
+  return button;
+}
+
+function createSoundscape() {
+  const Context = window.AudioContext || window.webkitAudioContext;
+  if (!Context) return null;
+  const context = new Context();
+  const master = context.createGain();
+  master.gain.value = 0;
+  master.connect(context.destination);
+  const drum = context.createOscillator();
+  const drumGain = context.createGain();
+  const water = context.createGain();
+  const throb = context.createOscillator();
+  const throbGain = context.createGain();
+  drum.frequency.value = 49;
+  drumGain.gain.value = 0;
+  drum.connect(drumGain).connect(master);
+  throbGain.gain.value = 0;
+  throb.connect(throbGain).connect(drumGain.gain);
+  drum.start();
+  throb.start();
+  const buffer = context.createBuffer(1, context.sampleRate * 2, context.sampleRate);
+  const samples = buffer.getChannelData(0);
+  let noise = 0;
+  for (let index = 0; index < samples.length; index++) {
+    noise = noise * 0.61 + (Math.random() * 2 - 1) * 0.39;
+    samples[index] = noise;
+  }
+  const stream = context.createBufferSource();
+  const filter = context.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = 1000;
+  stream.buffer = buffer;
+  stream.loop = true;
+  stream.connect(filter).connect(water).connect(master);
+  stream.start();
+  return { context, master, drum, drumGain, throb, throbGain, water, filter };
+}
+
+function renderSound() {
+  if (!soundscape) return;
+  const { context, master, drum, drumGain, throb, throbGain, water, filter } = soundscape;
+  const now = context.currentTime;
+  const live = preferences.sound && mode === "playing";
+  master.gain.setTargetAtTime(live ? 0.54 : 0, now, 0.065);
+  if (!s || !live) return;
+  const outside = view === "grate";
+  const nearMachine = view === "machine";
+  const rpm = clamp(s.rpm / 200, 0, 1);
+  const pulse = rpm * (nearMachine ? 0.055 : 0.024);
+  drum.frequency.setTargetAtTime(47 - s.flow / 240 * 8, now, 0.12);
+  drumGain.gain.setTargetAtTime(pulse, now, 0.13);
+  throbGain.gain.setTargetAtTime(pulse * 0.8, now, 0.13);
+  throb.frequency.setTargetAtTime(Math.max(0.8, s.rpm / 60 * 2), now, 0.15);
+  const fireNoise = view === "fire" ? s.heat * 0.025 : 0;
+  water.gain.setTargetAtTime((outside ? 0.022 : 0.006) + s.flow / 220 * (outside ? 0.11 : 0.022) + fireNoise, now, 0.13);
+  filter.frequency.setTargetAtTime(outside ? 760 + s.flow * 2.4 : 600, now, 0.1);
+}
+
+async function enableSound() {
+  if (!preferences.sound) return;
+  try {
+    soundscape ??= createSoundscape();
+    if (!soundscape) throw new Error("Audio unavailable");
+    await soundscape.context.resume();
+    renderSound();
+  } catch {
+    preferences.sound = false;
+    savePreferences();
+    renderPreferences();
+  }
+}
+
+function actionSound(action) {
+  if (!soundscape || !preferences.sound || mode !== "playing") return;
+  const { context, master } = soundscape;
+  const now = context.currentTime;
+  const oscillator = context.createOscillator();
+  const voice = context.createGain();
+  const frequency = { rake: 115, coal: 91, scoop: 200, feed: 155, venturi: 227, machine: 105 }[action] || 176;
+  oscillator.type = action === "coal" || action === "rake" ? "triangle" : "sine";
+  oscillator.frequency.setValueAtTime(frequency, now);
+  oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.54, now + 0.13);
+  voice.gain.setValueAtTime(0.07, now);
+  voice.gain.exponentialRampToValueAtTime(0.0001, now + 0.17);
+  oscillator.connect(voice).connect(master);
+  oscillator.onended = () => { oscillator.disconnect(); voice.disconnect(); };
+  oscillator.start(now);
+  oscillator.stop(now + 0.18);
+}
+
+function renderPreferences() {
+  setText(ui.sound, preferences.sound ? "Geluid aan" : "Geluid uit");
+  ui.sound.setAttribute("aria-pressed", String(preferences.sound));
+  ui.motion.setAttribute("aria-pressed", String(preferences.reduced));
+  visual.reduced = preferences.reduced || lessMotion.matches;
+}
+
+function resetFrame() {
+  remainder = 0;
+  lastFrame = performance.now();
+}
+
+function showDialog(title, body, actions, kicker = "") {
+  if (ui.overlay.hidden) modalOrigin = document.activeElement;
+  setText(ui["dialog-title"], title);
+  setText(ui["dialog-body"], body);
+  setText(ui["dialog-kicker"], kicker);
+  ui["dialog-kicker"].hidden = !kicker;
+  ui["dialog-actions"].replaceChildren(...actions.map(([text, handler], index) => makeButton(text, handler, index === 0 ? "primary" : "")));
+  ui.overlay.hidden = false;
+  document.querySelector("main").inert = true;
+  ui["dialog-title"].focus();
+}
+
+function hideDialog(fallback) {
+  ui.overlay.hidden = true;
+  document.querySelector("main").inert = false;
+  const focusTarget = modalOrigin?.isConnected && modalOrigin.getClientRects().length ? modalOrigin : fallback;
+  focusTarget?.focus();
+  modalOrigin = null;
+}
+
+function menu() {
+  mode = "menu";
+  ui.wordmark.hidden = true;
+  ui.game.hidden = true;
+  ui.menu.hidden = false;
+  ui.duties.replaceChildren();
+  lessons.forEach((lesson, index) => {
+    const choose = makeButton("", () => openDuty(index), "duty");
+    const number = document.createElement("span");
+    const title = document.createElement("strong");
+    number.textContent = "Dienst " + (index + 1) + (preferences.completed.includes(index) ? " · Voltooid" : " · " + lesson.time);
+    title.textContent = lesson.title;
+    choose.append(number, title);
+    ui.duties.append(choose);
+  });
+  hideDialog(ui.duties.firstElementChild);
+  renderSound();
+}
+
+function openDuty(level, checkpoint = null) {
+  cancelDrag();
+  s = checkpoint ? { ...checkpoint, cleared: checkpoint.cleared.slice(), checkpoint, incident: true, airLeak: true, result: "" } : newGame(level);
+  if (!checkpoint && level === 0) updatePump(s, 0);
+  mode = "ready";
+  hints = { key: "", index: 0 };
+  visual.coalAt = -100;
+  visual.lifting = { index: -1, at: -100 };
+  ui.menu.hidden = true;
+  ui.wordmark.hidden = false;
+  ui.game.hidden = false;
+  setText(ui["duty-name"], "Dienst " + (level + 1) + " · " + lessons[level].title);
+  setText(ui.message, "");
+  switchView(checkpoint ? "machine" : lessons[level].view, false);
+  showDialog(checkpoint ? "Het herstel opnieuw proberen" : lessons[level].title,
+    checkpoint ? "De bemaling is op gang gekomen. Er verandert zo iets bij de pomp." : lessons[level].intro,
+    [[checkpoint ? "Hervatten" : "Begin dienst", startPlaying], ["Alle diensten", menu]]);
+}
+
+function startPlaying() {
+  mode = "playing";
+  resetFrame();
+  hideDialog(places.find(place => place.hasAttribute("aria-current")));
+  render();
+  enableSound();
+}
+
+function pause(hidden = false) {
+  if (mode !== "playing") return;
+  cancelDrag();
+  mode = "paused";
+  renderSound();
+  showDialog("Dienst gepauzeerd", hidden ? "Je browservenster was uit beeld. De simulatie staat stil." : "Tijd, water en machine staan op dezelfde stand.",
+    [["Hervatten", startPlaying], ["Begin opnieuw", () => openDuty(s.level)], ["Alle diensten", menu]]);
+}
+
+function finish() {
+  cancelDrag();
+  mode = "finished";
+  renderSound();
+  if (s.result !== "success") {
+    const actions = s.checkpoint ? [["Herstel opnieuw", () => openDuty(s.level, s.checkpoint)]] : [];
+    actions.push(["Begin opnieuw", () => openDuty(s.level)], ["Alle diensten", menu]);
+    showDialog("Dienst afgebroken", s.result === "water"
+      ? "Het water stond te lang onderin het peilglas. De collega heeft ingegrepen."
+      : "De druk bleef te lang te hoog. De collega heeft ingegrepen.", actions);
+    return;
+  }
+  if (!preferences.completed.includes(s.level)) preferences.completed.push(s.level);
+  savePreferences();
+  const actions = s.level + 1 < lessons.length ? [["Volgende dienst", () => openDuty(s.level + 1)]] : [["Alle diensten", menu]];
+  actions.push(["Opnieuw spelen", () => openDuty(s.level)]);
+  if (s.level + 1 < lessons.length) actions.push(["Alle diensten", menu]);
+  const summary = [
+    "Het hek laat weer genoeg water door en het ketelwater staat goed. De polder is op peil.",
+    s.pressureDip ? "De pomp is gevuld. Door op tijd bij te stoken kreeg de machine weer genoeg stoom."
+      : "De pomp is gevuld en je hield de stoomdruk op peil toen de machine harder moest werken.",
+    "Je vond het lek, legde de machine stil en bracht de bemaling weer op gang. De volgende ploeg kan het overnemen."
+  ][s.level];
+  showDialog("Dienst gehaald", summary, actions, "Overdracht · polderpeil " + format.format(s.peil) + " cm");
+}
+
+function objective() {
+  if (s.level === 0 && clog(s) > 0.061) return { key: "grate", text: "Laat het water door het hek stromen" };
+  if (s.airLeak || s.repair > 0) {
+    if (s.repair > 0) return { key: "leak", text: "Wacht tot de reparatie klaar is" };
+    if (!s.valve && s.rpm) return { key: "leak", text: "Laat de machine uitlopen" };
+    if (!s.valve) return { key: "leak", text: "Laat het lek dichten" };
+    return { key: "leak", text: "Zoek waarom de afvoer wegvalt" };
+  }
+  if (!s.valve && s.boiler < 30) return { key: "feed", text: "Herstel het ketelwater voor het starten" };
+  if (!s.valve) {
+    if (s.pressure < 5.5) return { key: "fire", text: "Breng de ketel op stoom" };
+    return { key: "start", text: s.repaired ? "Start de warme machine opnieuw" : "Maak de machine startklaar" };
+  }
+  if (s.fill < 0.96 && s.pressure < 3.5) return { key: "fire", text: "Herstel de stoomdruk" };
+  if (s.fill < 0.96) return { key: "prime", text: "Zorg dat de pomp water levert" };
+  if (s.venturi) return { key: "close", text: "Sluit de venturi bij het volle pompglas" };
+  if (!steadyWater(s) || s.feed !== 1 || (s.level === 0 && !s.waterManaged)) {
+    return { key: "feed", text: s.boiler < 48 ? "Breng het ketelwater op peil"
+      : s.boiler > 73 ? "Laat het ketelwater zakken"
+      : "Zet de voeding op Normaal" };
+  }
+  if (s.pressure < 7.8 || (s.level === 1 && !s.coalCount)) return { key: "fire", text: "Houd het vuur op sterkte" };
+  if (s.check) return { key: "hold", text: "Het peil komt tot rust" };
+  return { key: "hold", text: s.peil > zone.high ? "Bemaal de polder tot het peil goed staat" : "Houd de bemaling aan de gang" };
+}
+
+function getWarning() {
+  if (s.boiler < 30) return "Ketelwater erg laag. Kijk direct bij het ketelhuis.";
+  if (s.pressure > 12.4) return "Hoge druk. Laat het vuur afnemen en volg de drukmeter.";
+  if (s.airLeak && !s.repair) return "Het pompglas verliest water en de afvoer valt weg.";
+  if (s.boiler > 74) return "Ketelwater boven de bovenste markering. Zet de voeding lager.";
+  if (s.valve && s.boiler < 48) return "Het ketelwater staat laag. Kijk naar het peilglas.";
+  if (s.valve && s.pressure < 7.5) return "De stoomdruk loopt terug. Bekijk het vuur.";
+  if (s.relief > 0.25) return "De veiligheidsklep laat stoom af.";
+  return "";
+}
+
+function help() {
+  const goal = objective();
+  if (goal.key !== hints.key) hints = { key: goal.key, index: 0 };
+  const options = {
+    grate: ["Kijk waar het water tegen het krooshek blijft staan.", "Een groot stuk vuil houdt meer water tegen dan losse blaadjes.", "Trek de tak en het riet met de hark omhoog."],
+    prime: ["Kijk in de machinekamer naar het pompglas.", "Het wiel draait, maar de pomp bevat nog lucht.", "Open de venturi en volg de waterlijn."],
+    close: ["Het pompglas is vol.", "De pomp heeft de venturi nu niet meer nodig.", "Sluit de venturi. Het water blijft stromen."],
+    feed: ["Bekijk het peilglas in het ketelhuis.", "Vergelijk de waterlijn met de twee strepen.", !s.valve && s.boiler < 30
+      ? "Vraag de collega in het ketelhuis om hulp."
+      : s.boiler > 73 ? "Draai de voeding terug. Zet haar op Normaal als het water weer tussen de strepen staat."
+      : s.boiler < 48 ? "Zet het handwiel op Bijvullen. Zet het op Normaal zodra het peil goed staat."
+      : "Zet de voeding op Normaal als de waterlijn tussen de strepen staat."],
+    fire: ["Kijk naar het vuur en de drukmeter in het ketelhuis.", "Het vuur levert warmte. De druk reageert later.", "Vul de schep en breng één schep kolen naar de vuurdeur. Volg de reactie."],
+    start: ["Bekijk de machinekamer.", "Controleer de stand van de voorbereidingskranen en de cilinder.", preflight(s) || "Open de hoofdstoomkraan om te starten."],
+    leak: ["Kijk in de machinekamer naar het pompglas.", "Het glas raakt zijn water kwijt. De leiding laat lucht binnen.", "Leg de machine stil, laat het lek dichten en vul de pomp na de warme herstart."],
+    hold: ["Kijk naar het polderpeil en de afvoer.", "Zolang er meer water weggaat dan erbij komt, daalt het peil.", "Laat het gemaal draaien en blijf druk en ketelwater volgen."]
+  }[goal.key];
+  setText(ui.message, options[Math.min(hints.index++, options.length - 1)]);
+}
+
+function cancelDrag() {
+  const drag = visual.drag;
+  const { id, target } = drag;
+  drag.id = null;
+  drag.target = null;
+  drag.moved = false;
+  if (id !== null && target?.hasPointerCapture?.(id)) target.releasePointerCapture(id);
+}
+
+function actionButton(action, label, parent, position = null, value = null) {
+  const button = makeButton(label, () => {
+    if (ignoreClick?.button === button && performance.now() < ignoreClick.until) return;
+    perform(action, value);
+  }, position ? "hotspot" : "");
+  button.dataset.action = action;
+  if (value !== null) button.dataset.value = String(value);
+  if (position) {
+    button.style.left = position[0] + "%";
+    button.style.top = position[1] + "%";
+  }
+  parent.append(button);
+  return button;
+}
+
+function switchView(next, focus = true) {
+  cancelDrag();
+  view = next;
+  ui.tools.replaceChildren();
+  ui["bench-controls"].replaceChildren();
+  visual.rakeButtons = [];
+  visual.scoopButton = null;
+  const bench = ui["bench-controls"];
+  if (view === "grate") {
+    debris.forEach((piece, index) => {
+      const button = actionButton("rake", piece.name, ui.tools, [34 + index * 17, 73], index);
+      button.dataset.drag = "rake";
+      button.setAttribute("aria-label", "Hark " + piece.name.toLowerCase() + " omhoog");
+      visual.rakeButtons[index] = button;
+    });
+  } else if (view === "fire") {
+    visual.scoopButton = actionButton("scoop", "Schep vullen", ui.tools, [19, 84]);
+    visual.scoopButton.dataset.drag = "scoop";
+    actionButton("coal", "Kolen op het vuur", ui.tools, [61, 79]);
+    bench.append(makeButton("Naar het peilglas", () => switchView("water"), "closeup"));
+  } else if (view === "water") {
+    const wheel = actionButton("wheel", "Handwiel", ui.tools, [27, 65]);
+    wheel.id = "feed-wheel";
+    wheel.dataset.drag = "wheel";
+    ["Dicht", "Normaal", "Bijvullen"].forEach((label, value) => actionButton("feed", label, bench, null, value));
+    actionButton("helpWater", "Vraag collega om hulp", bench);
+    bench.append(makeButton("Naar de vuurdeur", () => switchView("fire"), "closeup"));
+  } else {
+    actionButton("machine", "Hoofdstoomkraan", ui.tools, [35, 80]);
+    actionButton("venturi", "Pomp vullen", ui.tools, [75, 70]);
+    if (s.level === 2) {
+      actionButton("warm", "Voorwarming", bench);
+      actionButton("drain", "Condenswaterkraan", bench);
+      actionButton("oil", "Smeren", bench);
+      actionButton("turn", "Tornen", bench);
+      actionButton("repair", "Lek laten dichten", bench);
+    }
+  }
+  const room = view === "fire" || view === "water" ? "boiler" : view;
+  for (const tab of places) {
+    if (tab.dataset.place === room) tab.setAttribute("aria-current", "location");
+    else tab.removeAttribute("aria-current");
+  }
+  bench.hidden = !bench.children.length;
+  if (focus) {
+    const first = Array.from(ui.tools.children).find(button => !button.disabled &&
+      (button.dataset.action !== "rake" || !s.cleared[Number(button.dataset.value)]));
+    (first || bench.querySelector("button"))?.focus();
+  }
+  render();
+}
+
+function perform(action, value = null) {
+  if (mode !== "playing") return;
+  if (action === "wheel") {
+    action = "feed";
+    value = s.feed === 2 ? 1 : s.feed + 1;
+  }
+  if (s.level === 0 && (action === "scoop" || action === "coal")) {
+    setText(ui.message, "De collega zorgt tijdens deze dienst voor het vuur.");
+    return;
+  }
+  const count = s.coalCount;
+  const message = act(s, action, value);
+  if (!message) return;
+  if (action === "coal" && s.coalCount > count) visual.coalAt = s.time;
+  if (action === "rake") {
+    visual.lifting = { index: value, at: s.time };
+    if (document.activeElement === visual.rakeButtons[value]) {
+      const next = visual.rakeButtons.find((_, index) => !s.cleared[index]);
+      (next || places[0]).focus();
+    }
+  }
+  setText(ui.message, action === "rake" && clog(s) <= 0.061 && !s.waterManaged
+    ? "Er stroomt weer genoeg water. Kijk nu naar het peilglas in het ketelhuis." : message);
+  actionSound(action);
+  render();
+}
+
+function showReadings(values) {
+  while (ui.instruments.children.length > values.length) ui.instruments.lastElementChild.remove();
+  values.forEach(([text, alert], index) => {
+    let node = ui.instruments.children[index];
+    if (!node) {
+      node = document.createElement("span");
+      ui.instruments.append(node);
+    }
+    node.className = alert ? "reading alert" : "reading";
+    setText(node, text);
+  });
+}
+
+function renderTools() {
+  const stop = !s.valve && !s.rpm;
+  const instrumentNames = ["Dicht", "Normaal", "Bijvullen"];
+  for (const button of [...ui.tools.children, ...ui["bench-controls"].querySelectorAll("[data-action]")]) {
+    const value = Number(button.dataset.value);
+    switch (button.dataset.action) {
+      case "rake": button.hidden = s.cleared[value]; break;
+      case "scoop":
+        setText(button, s.scoop ? "Schep terugleggen" : "Schep vullen");
+        button.disabled = s.level === 0;
+        break;
+      case "coal": button.disabled = s.level === 0; break;
+      case "wheel":
+        setText(button, instrumentNames[s.feed]);
+        button.setAttribute("aria-label", "Handwiel voeding, " + instrumentNames[s.feed]);
+        break;
+      case "feed": button.setAttribute("aria-pressed", String(s.feed === value)); break;
+      case "helpWater": button.hidden = !stop || s.boiler >= 30; button.disabled = s.supportWater; break;
+      case "machine": setText(button, s.valve ? "Machine stoppen" : "Machine starten"); break;
+      case "venturi":
+        setText(button, s.venturi ? "Venturi sluiten" : "Pomp vullen");
+        button.disabled = !s.venturi && !s.valve;
+        break;
+      case "warm":
+        setText(button, s.warm ? "Voorwarming sluiten" : "Voorwarmen");
+        button.setAttribute("aria-pressed", String(s.warm));
+        button.hidden = s.valve;
+        break;
+      case "drain":
+        setText(button, s.drain ? "Condenswaterkraan sluiten" : "Ontwateren");
+        button.setAttribute("aria-pressed", String(s.drain));
+        button.hidden = s.valve;
+        break;
+      case "oil":
+        setText(button, s.oil >= 0.3 ? "Opnieuw smeren" : "Smeren");
+        button.hidden = s.valve;
+        break;
+      case "turn": button.hidden = s.valve; button.disabled = !stop; break;
+      case "repair": button.hidden = !s.airLeak; button.disabled = !stop || s.repair > 0; break;
+    }
+  }
+  const bench = ui["bench-controls"];
+  bench.hidden = !Array.from(bench.children).some(button => !button.hidden);
+}
+
+function render() {
+  if (!s || mode === "menu") return;
+  const trend = s.trend > 0.14 ? "stijgt" : s.trend < -0.14 ? "daalt" : "stabiel";
+  const zoneText = inZone(s) ? "op peil" : s.peil > zone.high ? "hoog" : "laag";
+  setText(ui.polder, format.format(s.peil) + " cm · " + zoneText + " · " + trend);
+  setText(ui.goal, objective().text);
+  const warning = getWarning();
+  ui.warning.hidden = !warning;
+  setText(ui.warning, warning);
+  const flow = Math.round(s.flow);
+  if (view === "grate") {
+    showReadings([["Afvoer " + flow + " m³/min"], ["Water erbij " + Math.round(s.inflow) + " m³/min"]]);
+  } else if (view === "fire") {
+    showReadings([
+      [s.fresh > 0.56 ? "Veel verse kolen" : s.heat < 0.58 ? "Vuur zwak" : "Vuur brandt goed", s.heat < 0.42],
+      [s.temperature < 100 ? "Ketel warmt op · " + Math.round(s.temperature) + " °C" : "Stoomdruk " + format.format(s.pressure) + " bar", s.valve && s.pressure < 7.5]
+    ]);
+  } else if (view === "water") {
+    showReadings([["Ketelwater · " + (s.boiler < 48 ? "Laag" : s.boiler > 73 ? "Hoog" : "Op peil"), !steadyWater(s)]]);
+  } else {
+    const notes = [
+      [s.valve && s.rpm > 1 ? "Vliegwiel draait" : s.rpm > 1 ? "Vliegwiel loopt uit" : "Vliegwiel stil"],
+      [s.fill >= 0.96 ? "Pompglas vol" : "Pompglas " + Math.min(95, Math.round(100 * s.fill)) + "%"],
+      ["Afvoer " + flow + " m³/min"]
+    ];
+    if (!s.valve && s.level === 2) {
+      notes.push([s.cylinder < 60 ? "Cilinder koud" : "Cilinder warm"],
+        [s.condensate > 0.14 ? "Condenswater aanwezig" : "Cilinder ontwaterd"],
+        [s.pressure < 5.5 ? "Nog te weinig stoom voor start" : "Stoomdruk klaar voor start"]);
+    }
+    showReadings(notes);
+  }
+  renderTools();
+  art(s, view, visual);
+  renderSound();
+}
+
+for (const tab of places) {
+  tab.addEventListener("click", () => {
+    if (mode !== "playing") return;
+    const place = tab.dataset.place;
+    switchView(place === "boiler" ? (s.level === 0 || objective().key === "feed" ? "water" : "fire") : place);
+  });
+}
+
+ui.stage.addEventListener("pointerdown", event => {
+  const button = event.target.closest("[data-drag]");
+  const drag = visual.drag;
+  if (mode !== "playing" || !button || button.disabled || event.button !== 0 || drag.id !== null) return;
+  drag.id = event.pointerId;
+  drag.target = button;
+  drag.startX = drag.x = event.clientX;
+  drag.startY = drag.y = event.clientY;
+  drag.moved = false;
+  button.setPointerCapture(event.pointerId);
+});
+ui.stage.addEventListener("pointermove", event => {
+  const drag = visual.drag;
+  if (event.pointerId !== drag.id) return;
+  drag.x = event.clientX;
+  drag.y = event.clientY;
+  drag.moved ||= Math.hypot(drag.x - drag.startX, drag.y - drag.startY) > 9;
+});
+ui.stage.addEventListener("pointerup", event => {
+  const drag = visual.drag;
+  if (event.pointerId !== drag.id) return;
+  const from = drag.target;
+  const dx = event.clientX - drag.startX;
+  const dy = event.clientY - drag.startY;
+  const moved = drag.moved || Math.hypot(dx, dy) > 9;
+  const hit = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-action]");
+  cancelDrag();
+  if (!moved) return;
+  ignoreClick = { button: from, until: performance.now() + 280 };
+  if (from.dataset.drag === "rake" && dy < -22) perform("rake", Number(from.dataset.value));
+  if (from.dataset.drag === "scoop" && hit?.dataset.action === "coal") {
+    if (!s.scoop) perform("scoop");
+    perform("coal");
+  }
+  if (from.dataset.drag === "wheel" && Math.max(Math.abs(dx), Math.abs(dy)) > 18) {
+    perform("feed", clamp(s.feed + Math.sign(Math.abs(dx) >= Math.abs(dy) ? dx : -dy), 0, 2));
+  }
+});
+ui.stage.addEventListener("pointercancel", cancelDrag);
+ui.stage.addEventListener("lostpointercapture", event => { if (event.pointerId === visual.drag.id) cancelDrag(); });
+ui.pause.addEventListener("click", () => pause());
+ui.help.addEventListener("click", help);
+ui.sound.addEventListener("click", () => {
+  preferences.sound = !preferences.sound;
+  savePreferences();
+  renderPreferences();
+  if (preferences.sound) enableSound();
+  else renderSound();
+});
+ui.motion.addEventListener("click", () => {
+  preferences.reduced = !preferences.reduced;
+  savePreferences();
+  renderPreferences();
+  render();
+});
+lessMotion.addEventListener?.("change", () => { renderPreferences(); render(); });
+document.addEventListener("visibilitychange", () => { if (document.hidden) pause(true); });
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && mode === "playing") {
+    event.preventDefault();
+    pause();
+  } else if (event.key === "Escape" && mode === "paused") {
+    event.preventDefault();
+    startPlaying();
+  } else if (event.key === "Tab" && !ui.overlay.hidden) {
+    const buttons = Array.from(ui["dialog-actions"].querySelectorAll("button"));
+    if (event.shiftKey && (document.activeElement === buttons[0] || document.activeElement === ui["dialog-title"])) {
+      event.preventDefault();
+      buttons.at(-1).focus();
+    } else if (!event.shiftKey && document.activeElement === buttons.at(-1)) {
+      event.preventDefault();
+      buttons[0].focus();
+    }
+  }
+});
+
+function frame(now) {
+  const elapsed = Math.max(0, Math.min(0.25, (now - lastFrame) / 1000));
+  lastFrame = now;
+  if (mode === "playing") {
+    remainder += elapsed;
+    while (remainder >= 0.05 && !s.result) {
+      const leaking = s.airLeak;
+      const repairing = s.repair > 0;
+      const supported = s.assisted;
+      tick(s, 0.05);
+      remainder -= 0.05;
+      if (!leaking && s.airLeak) setText(ui.message, "De afvoer verandert. Kijk wat er bij de pomp gebeurt.");
+      if (repairing && s.repaired) setText(ui.message, "De leiding is hersteld. Je kunt de warme machine weer voorbereiden.");
+      if (!supported && s.assisted) setText(ui.message, "De collega houdt het ketelwater laag maar veilig. Zet de voeding op Bijvullen.");
+    }
+    if (s.result) {
+      render();
+      finish();
+    } else if (now - lastDraw > 32) {
+      lastDraw = now;
+      render();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+renderPreferences();
+menu();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
