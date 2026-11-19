@@ -188,6 +188,19 @@ header .brand-logo{width:65px;height:65px}
 
 #stokerTempo:disabled,#feedSetting:disabled,button[data-ctl="valve"]:disabled{opacity:.45;cursor:not-allowed;}
 .feed-slider-control:has(#feedSetting:disabled),.feed-slider-control:has(#stokerTempo:disabled){opacity:.45;}
+.sidebar .part.placed{opacity:1;cursor:pointer}.sidebar .part.placed small{color:#ffbb8c;font-weight:700;margin-top:4px}.machine{cursor:pointer}.machine:hover{filter:brightness(1.15)}
+#machines [data-machine]{cursor:grab;touch-action:none;transition:filter .18s ease}
+/* Hover the complete component, including transparent areas between its shapes. */
+#machines [data-machine]:hover{filter:drop-shadow(0 0 5px rgba(255,206,100,.95)) drop-shadow(0 0 11px rgba(255,170,54,.7));cursor:grab}
+#machines [data-machine].return-drag-active{filter:drop-shadow(0 0 8px rgba(255,219,130,1)) drop-shadow(0 0 14px rgba(255,171,54,.9));cursor:grabbing}
+#machines [data-machine] .component-hit-area{fill:transparent;stroke:none;pointer-events:all}
+#parts.return-target{outline:3px dashed #f3b35e;outline-offset:3px;background:rgba(243,179,94,.12)}
+
+/* v154: only the moving, visible artwork glows; never the hitbox or slot. */
+#machines [data-machine].return-drag-active{filter:none!important;opacity:.45;cursor:grabbing}
+.return-component-ghost{background:transparent!important;border:0!important;box-shadow:none!important;filter:none!important;overflow:visible!important}
+.return-component-ghost svg{overflow:visible;filter:drop-shadow(0 0 5px rgba(255,214,110,.95)) drop-shadow(0 0 12px rgba(255,164,40,.8))!important}
+.return-component-ghost .component-hit-area{display:none!important}
 </style><style>
 .feed-slider-control{background:#303030;border:1px solid #555;border-radius:6px;padding:5px 9px;margin-top:3px;color:#eee}
 .feed-slider-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px}
@@ -391,6 +404,18 @@ const library=document.createElementNS("http://www.w3.org/2000/svg","svg");libra
 const shapeOf=id=>library.querySelector(`[data-machine="${id}"]`).innerHTML;
 $('slots').innerHTML=items.filter(i=>!placed.has(i.id)).map(i=>`<g class="slot" data-slot="${i.id}">${shapeOf(i.id)}</g>`).join('');
 $('machines').innerHTML=superGradientDefs+items.filter(i=>placed.has(i.id)).map(i=>`<g class="machine" data-machine="${i.id}">${shapeOf(i.id)}</g>`).join('');
+// Add a transparent hit area behind each complete SVG component. This makes
+// hovering/dragging possible from ANY point inside its visible footprint,
+// even if that point is a gap between the illustrated shapes.
+$('machines').querySelectorAll('[data-machine]').forEach(machine=>{
+ const bounds=machine.getBBox();
+ if(!bounds.width||!bounds.height)return;
+ const hit=document.createElementNS('http://www.w3.org/2000/svg','rect');
+ hit.setAttribute('class','component-hit-area');
+ hit.setAttribute('x',bounds.x);hit.setAttribute('y',bounds.y);
+ hit.setAttribute('width',bounds.width);hit.setAttribute('height',bounds.height);
+ machine.insertBefore(hit,machine.firstChild);
+});
 if(placed.has('super')){
  const superPart=$('machines').querySelector('[data-machine="super"]');
  const channel=superPart?.querySelector('#superSteamChannel');
@@ -408,7 +433,7 @@ if(connected('shaft1','shaft2')){
   // It is part of the existing mechanical connection group, not an extra switch.
   if(has('engine','condenser'))$('machines').insertAdjacentHTML('afterbegin','<path d="M202 248 V515 H95" stroke="#865128" stroke-width="7" stroke-linejoin="miter" stroke-linecap="butt" fill="none" pointer-events="none"/>');
 }
-$('parts').innerHTML=items.map(i=>`<button class="part ${placed.has(i.id)?'placed':''} ${selected===i.id?'active':''}" data-part="${i.id}" ${placed.has(i.id)?'disabled':''} title="${i.desc}"><svg viewBox="${i.x-125} ${i.y-165} 250 250" preserveAspectRatio="xMidYMid meet">${shapeOf(i.id)}</svg><span class="part-label"><strong>${i.name}</strong></span></button>`).join('');$('connections').innerHTML=bundles.map(b=>`<button class="bundle switch-row ${b.ids.every(id=>wired.has(id))?'on':''}" data-bundle="${b.id}" aria-pressed="${b.ids.every(id=>wired.has(id))}" title="${b.desc}"><span>${b.name}</span><span class="track"></span></button>`).join('');document.querySelectorAll('[data-ctl]').forEach(b=>{const unavailable=b.dataset.ctl==='valve'&&(!has('boiler')||!connected('sat','hot','exhaust'));if(unavailable)ctl.valve=false;b.disabled=unavailable;b.classList.toggle('on',!!ctl[b.dataset.ctl]);b.setAttribute('aria-pressed',String(!!ctl[b.dataset.ctl]));});$('stokerTempo').disabled=!has('boiler');if(!has('boiler')){stokerTempo='stopped';$('stokerTempo').value='0';updateStokerTempoLabel();}const feedControlReady=has('plunger')&&connected('shaft1','shaft2','intake1','feed')&&rpm>0.1&&!lost;$('feedSetting').disabled=!feedControlReady;if(!feedControlReady&&!has('plunger')){feedSetting=0;$('feedSetting').value='0';updateFeedSettingLabel();}}
+$('parts').innerHTML=items.map(i=>`<button class="part ${placed.has(i.id)?'placed':''} ${selected===i.id?'active':''}" data-part="${i.id}" title="${placed.has(i.id)?'Klik om dit onderdeel te verwijderen':i.desc}"><svg viewBox="${i.x-125} ${i.y-165} 250 250" preserveAspectRatio="xMidYMid meet">${shapeOf(i.id)}</svg><span class="part-label"><strong>${i.name}</strong></span></button>`).join('');$('connections').innerHTML=bundles.map(b=>`<button class="bundle switch-row ${b.ids.every(id=>wired.has(id))?'on':''}" data-bundle="${b.id}" aria-pressed="${b.ids.every(id=>wired.has(id))}" title="${b.desc}"><span>${b.name}</span><span class="track"></span></button>`).join('');document.querySelectorAll('[data-ctl]').forEach(b=>{const unavailable=b.dataset.ctl==='valve'&&(!has('boiler')||!connected('sat','hot','exhaust'));if(unavailable)ctl.valve=false;b.disabled=unavailable;b.classList.toggle('on',!!ctl[b.dataset.ctl]);b.setAttribute('aria-pressed',String(!!ctl[b.dataset.ctl]));});$('stokerTempo').disabled=!has('boiler');if(!has('boiler')){stokerTempo='stopped';$('stokerTempo').value='0';updateStokerTempoLabel();}const feedControlReady=has('plunger')&&connected('shaft1','shaft2','intake1','feed')&&rpm>0.1&&!lost;$('feedSetting').disabled=!feedControlReady;if(!feedControlReady&&!has('plunger')){feedSetting=0;$('feedSetting').value='0';updateFeedSettingLabel();}}
 
 function updateGuidance(){
  const missing=items.filter(i=>!placed.has(i.id));
@@ -424,10 +449,80 @@ function updateGuidance(){
  $('statusMessage').textContent=msg;const objective=$('statusObjective');if(objective)objective.textContent='Doel: 500 m³ · '+formatNL(Math.min(volume,500),1)+' m³ verpompt';
 
 }
+function removeComponent(id){
+ if(!placed.has(id))return;
+ placed.delete(id);
+ // Remove every connection touching the removed component, not entire unrelated bundles.
+ links.forEach(l=>{if(l[2]===id||l[3]===id)wired.delete(l[0]);});
+ if(selected===id)selected=null;
+ if(id==='boiler'){stokerTempo='stopped';$('stokerTempo').value='0';ctl.valve=false;}
+ if(id==='plunger'){feedSetting=0;$('feedSetting').value='0';}
+ if(!has('boiler','super','engine')||!connected('sat','hot','exhaust'))ctl.valve=false;
+ renderStatic();updateGuidance();
+ log('Verwijderd: '+items.find(i=>i.id===id).name+' (bijbehorende aansluitingen ontkoppeld)');
+}
 function place(id){if(!selected)return log('Selecteer eerst een onderdeel.');if(id!==selected)return log('Dit is niet de juiste fundatie.');placed.add(id);selected=null;renderStatic();log('Gemonteerd: '+items.find(i=>i.id===id).name);updateGuidance()}
-$('scene').addEventListener('click',e=>{let s=e.target.closest('[data-slot]');if(s)place(s.dataset.slot)});$('parts').addEventListener('click',e=>{let p=e.target.closest('[data-part]');if(p&&!placed.has(p.dataset.part)){selected=p.dataset.part;renderStatic();updateGuidance()}});
+$('scene').addEventListener('click',e=>{
+ let machine=e.target.closest('#machines [data-machine]');
+ if(machine)return;
+ let slot=e.target.closest('[data-slot]');if(slot)place(slot.dataset.slot);
+});
+$('parts').addEventListener('click',e=>{
+ let p=e.target.closest('[data-part]');if(!p)return;
+ if(placed.has(p.dataset.part))return;
+ selected=p.dataset.part;renderStatic();updateGuidance();
+});
 function localPoint(cx,cy){let s=$('scene'),p=s.createSVGPoint();p.x=cx;p.y=cy;return p.matrixTransform(s.getScreenCTM().inverse())}function updateHover(cx,cy){let p=localPoint(cx,cy),near=null,best=1e9;for(let i of items){if(placed.has(i.id))continue;let d=Math.hypot(p.x-i.x,(p.y-i.y)*.85);if(d<best){best=d;near=i.id}}hover=best<105?near:null;document.querySelectorAll('.slot').forEach(s=>{s.classList.toggle('target',s.dataset.slot===hover&&hover===drag?.id);s.classList.toggle('wrong',s.dataset.slot===hover&&hover!==drag?.id)})}
-$('parts').addEventListener('pointerdown',e=>{let p=e.target.closest('[data-part]');if(!p||p.disabled)return;drag={id:p.dataset.part,x:e.clientX,y:e.clientY,moved:false};e.preventDefault()});document.addEventListener('pointermove',e=>{if(!drag)return;if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<7)return;if(!drag.moved){drag.moved=true;ghost=document.createElement('div');ghost.className='ghost';const it=items.find(i=>i.id===drag.id);const existing=document.querySelector(`[data-slot="${drag.id}"]`);ghost.innerHTML=`<svg viewBox="${it.x-125} ${it.y-125} 250 250" width="150" height="150"><g class="ghost-shape">${existing?existing.innerHTML:''}</g></svg>`; document.body.appendChild(ghost)}ghost.style.left=e.clientX+'px';ghost.style.top=e.clientY+'px';updateHover(e.clientX,e.clientY)});document.addEventListener('pointerup',e=>{if(!drag)return;let d=drag;drag=null;if(ghost){ghost.remove();ghost=null}document.querySelectorAll('.slot').forEach(s=>s.classList.remove('target','wrong'));if(d.moved){if(hover===d.id){selected=d.id;place(d.id)}else log('Sleep het onderdeel naar de juiste fundatie.')}else{selected=d.id;renderStatic()}hover=null});document.addEventListener('pointercancel',()=>{drag=null;ghost?.remove();ghost=null});
+// Placed components can ONLY be removed by dragging them back into the parts panel.
+// No click-to-remove action. A dragged component retains its original position
+// until it is released over the panel, then removeComponent unhooks its pipes.
+let returnDrag=null, suppressSceneClick=false;
+$('scene').addEventListener('pointerdown',e=>{
+ const machine=e.target.closest('#machines [data-machine]');
+ if(!machine||!placed.has(machine.dataset.machine))return;
+ returnDrag={id:machine.dataset.machine,x:e.clientX,y:e.clientY,moved:false};
+ machine.classList.add('return-drag-active');
+ e.preventDefault();
+});
+document.addEventListener('pointermove',e=>{
+ if(!returnDrag)return;
+ if(!returnDrag.moved&&Math.hypot(e.clientX-returnDrag.x,e.clientY-returnDrag.y)<7)return;
+ if(!returnDrag.moved){
+  returnDrag.moved=true;
+  const original=$('machines').querySelector(`[data-machine="${returnDrag.id}"]`);
+  original?.classList.add('return-drag-active');
+  const it=items.find(i=>i.id===returnDrag.id);
+  const machine=$('machines').querySelector(`[data-machine="${returnDrag.id}"]`);
+  ghost=document.createElement('div');ghost.className='ghost return-component-ghost';
+  // Clone the actual component artwork, but exclude the transparent rectangular
+  // pointer hit area: SVG drop-shadow treats that rectangle as opaque.
+  const artwork=machine?machine.cloneNode(true):null;
+  artwork?.querySelectorAll('.component-hit-area').forEach(el=>el.remove());
+  artwork?.classList.remove('return-drag-active');
+  if(artwork){artwork.removeAttribute('filter');artwork.style.filter='none';}
+  ghost.innerHTML=`<svg viewBox="${it.x-125} ${it.y-125} 250 250" width="150" height="150"></svg>`;
+  if(artwork)ghost.querySelector('svg').appendChild(artwork);
+  document.body.appendChild(ghost);
+ }
+ ghost.style.left=(e.clientX+12)+'px';ghost.style.top=(e.clientY+12)+'px';
+ const r=$('parts').getBoundingClientRect();
+ $('parts').classList.toggle('return-target',e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);
+});
+document.addEventListener('pointerup',e=>{
+ if(!returnDrag)return;
+ const d=returnDrag;returnDrag=null;
+ $('machines').querySelector(`[data-machine="${d.id}"]`)?.classList.remove('return-drag-active');
+ ghost?.remove();ghost=null;
+ $('parts').classList.remove('return-target');
+ if(!d.moved)return;
+ suppressSceneClick=true;
+ const r=$('parts').getBoundingClientRect();
+ if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){removeComponent(d.id);}
+ else log('Sleep het geplaatste onderdeel terug naar het componentenpaneel om het te verwijderen.');
+});
+document.addEventListener('pointercancel',()=>{if(returnDrag){$('machines').querySelector(`[data-machine="${returnDrag.id}"]`)?.classList.remove('return-drag-active');returnDrag=null;ghost?.remove();ghost=null;$('parts').classList.remove('return-target');}});
+$('scene').addEventListener('click',e=>{if(suppressSceneClick){e.stopImmediatePropagation();suppressSceneClick=false;}},true);
+$('parts').addEventListener('pointerdown',e=>{let p=e.target.closest('[data-part]');if(!p||p.disabled||placed.has(p.dataset.part))return;drag={id:p.dataset.part,x:e.clientX,y:e.clientY,moved:false};e.preventDefault()});document.addEventListener('pointermove',e=>{if(!drag)return;if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<7)return;if(!drag.moved){drag.moved=true;ghost=document.createElement('div');ghost.className='ghost';const it=items.find(i=>i.id===drag.id);const existing=document.querySelector(`[data-slot="${drag.id}"]`);ghost.innerHTML=`<svg viewBox="${it.x-125} ${it.y-125} 250 250" width="150" height="150"><g class="ghost-shape">${existing?existing.innerHTML:''}</g></svg>`; document.body.appendChild(ghost)}ghost.style.left=e.clientX+'px';ghost.style.top=e.clientY+'px';updateHover(e.clientX,e.clientY)});document.addEventListener('pointerup',e=>{if(!drag)return;let d=drag;drag=null;if(ghost){ghost.remove();ghost=null}document.querySelectorAll('.slot').forEach(s=>s.classList.remove('target','wrong'));if(d.moved){if(hover===d.id){selected=d.id;place(d.id)}else log('Sleep het onderdeel naar de juiste fundatie.')}else{selected=d.id;renderStatic()}hover=null});document.addEventListener('pointercancel',()=>{drag=null;ghost?.remove();ghost=null});
 $('connections').addEventListener('click',e=>{let button=e.target.closest('[data-bundle]');if(!button||lost)return;let b=bundles.find(x=>x.id===button.dataset.bundle);let needed=[...new Set(b.ids.flatMap(id=>{let l=links.find(x=>x[0]===id);return [l[2],l[3]]}).filter(x=>x!=='wetering'&&x!=='maas'))];let missing=needed.filter(x=>!placed.has(x));if(missing.length)return log('Plaats eerst: '+missing.map(x=>items.find(i=>i.id===x).name).join(', '));const remove=b.ids.every(id=>wired.has(id));b.ids.forEach(id=>remove?wired.delete(id):wired.add(id));renderStatic();log((remove?'Leidinggroep ontkoppeld: ':'Complete groep aangesloten: ')+b.name);updateGuidance()});const feedSettingLabels=['Uit','Langzaam','Gemiddeld','Snel'];
 const stokerPositions=['stopped','slow','medium','fast'];
 const stokerLabels=['Uit','Langzaam','Gemiddeld','Snel'];
@@ -1202,7 +1297,7 @@ setInterval(()=>steamAudio.update(),45);
 <img id="aboutTuutorialLogo" alt="Tuutorial logo">
 <h2 id="aboutTuutorialTitle">Over de Tuutorial</h2>
 <p id="aboutTuutorialPurpose">De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.</p>
-<p id="aboutTuutorialVersion">Versie 150 · Release: 19 november 2026</p>
+<p id="aboutTuutorialVersion">Versie 154 · Release: 19 november 2026</p>
 <p id="aboutTuutorialCopyright">© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.</p>
 </div></div><script>
 (function(){
@@ -1212,12 +1307,12 @@ const close=document.getElementById('aboutTuutorialClose');
 if(!dialog||!logo||!close)return;
 document.getElementById('aboutTuutorialLogo').src=logo.src;
 const copy={
-nl:['Over de Tuutorial','De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.','Versie 150 · Release: 19 november 2026','© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.','Sluiten'],
-en:['About Tuutorial','Tuutorial is intended for educational and demonstration purposes for Stoomgemaal de Tuut in Appeltern. The simulator was conceived and developed by Ruben C.J. Smit in 2026 with the help of all the volunteers at De Tuut.','Version 150 · Released: 19 November 2026','© 2026 Monumentenstichting Baet & Borgh. All rights reserved.','Close'],
-de:['Über Tuutorial','Tuutorial dient Bildungs- und Demonstrationszwecken für das Dampfschöpfwerk De Tuut in Appeltern. Der Simulator wurde 2026 von Ruben C.J. Smit mit Unterstützung aller ehrenamtlichen Helfer von De Tuut konzipiert und entwickelt.','Version 150 · Veröffentlichung: 19. November 2026','© 2026 Monumentenstichting Baet & Borgh. Alle Rechte vorbehalten.','Schließen'],
-fr:['À propos de Tuutorial','Tuutorial est destiné à des fins pédagogiques et de démonstration pour la station de pompage à vapeur De Tuut à Appeltern. Le simulateur a été imaginé et développé par Ruben C.J. Smit en 2026 avec l’aide de tous les bénévoles de De Tuut.','Version 150 · Date de sortie : 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tous droits réservés.','Fermer'],
-it:['Informazioni su Tuutorial','Tuutorial è destinato a scopi didattici e dimostrativi per l’impianto di pompaggio a vapore De Tuut ad Appeltern. Il simulatore è stato ideato e sviluppato da Ruben C.J. Smit nel 2026 con l’aiuto di tutti i volontari di De Tuut.','Versione 150 · Pubblicazione: 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tutti i diritti riservati.','Chiudi'],
-es:['Acerca de Tuutorial','Tuutorial está destinado a fines educativos y de demostración para la estación de bombeo de vapor De Tuut en Appeltern. El simulador fue concebido y desarrollado por Ruben C.J. Smit en 2026 con la ayuda de todos los voluntarios de De Tuut.','Versión 150 · Lanzamiento: 19 de noviembre de 2026','© 2026 Monumentenstichting Baet & Borgh. Todos los derechos reservados.','Cerrar']
+nl:['Over de Tuutorial','De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.','Versie 154 · Release: 19 november 2026','© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.','Sluiten'],
+en:['About Tuutorial','Tuutorial is intended for educational and demonstration purposes for Stoomgemaal de Tuut in Appeltern. The simulator was conceived and developed by Ruben C.J. Smit in 2026 with the help of all the volunteers at De Tuut.','Version 154 · Released: 19 November 2026','© 2026 Monumentenstichting Baet & Borgh. All rights reserved.','Close'],
+de:['Über Tuutorial','Tuutorial dient Bildungs- und Demonstrationszwecken für das Dampfschöpfwerk De Tuut in Appeltern. Der Simulator wurde 2026 von Ruben C.J. Smit mit Unterstützung aller ehrenamtlichen Helfer von De Tuut konzipiert und entwickelt.','Version 154 · Veröffentlichung: 19. November 2026','© 2026 Monumentenstichting Baet & Borgh. Alle Rechte vorbehalten.','Schließen'],
+fr:['À propos de Tuutorial','Tuutorial est destiné à des fins pédagogiques et de démonstration pour la station de pompage à vapeur De Tuut à Appeltern. Le simulateur a été imaginé et développé par Ruben C.J. Smit en 2026 avec l’aide de tous les bénévoles de De Tuut.','Version 154 · Date de sortie : 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tous droits réservés.','Fermer'],
+it:['Informazioni su Tuutorial','Tuutorial è destinato a scopi didattici e dimostrativi per l’impianto di pompaggio a vapore De Tuut ad Appeltern. Il simulatore è stato ideato e sviluppato da Ruben C.J. Smit nel 2026 con l’aiuto di tutti i volontari di De Tuut.','Versione 154 · Pubblicazione: 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tutti i diritti riservati.','Chiudi'],
+es:['Acerca de Tuutorial','Tuutorial está destinado a fines educativos y de demostración para la estación de bombeo de vapor De Tuut en Appeltern. El simulador fue concebido y desarrollado por Ruben C.J. Smit en 2026 con la ayuda de todos los voluntarios de De Tuut.','Versión 154 · Lanzamiento: 19 de noviembre de 2026','© 2026 Monumentenstichting Baet & Borgh. Todos los derechos reservados.','Cerrar']
 };
 function update(){const lang=window.getSimulatorLanguage?.()||'nl';const a=copy[lang]||copy.nl;
 ['aboutTuutorialTitle','aboutTuutorialPurpose','aboutTuutorialVersion','aboutTuutorialCopyright'].forEach((id,i)=>document.getElementById(id).textContent=a[i]);
