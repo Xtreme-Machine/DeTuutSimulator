@@ -474,9 +474,9 @@ if(smokeHost){
  const intensity={stopped:0,slow:4,medium:8,fast:13}[stokerTempo];
  if(smokeHost.dataset.mode!==String(flueActive)+':'+stokerTempo){smokeHost.dataset.mode=String(flueActive)+':'+stokerTempo;smokeHost.innerHTML=flueActive?Array.from({length:intensity},(_,i)=>{const seed=i*7.39;const x=1000+Math.sin(seed)*12;const y=130-(i/intensity)*38;const r=6+(i/intensity)*15;return `<circle class="smoke-puff" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" style="animation-delay:${(-i*.31).toFixed(2)}s;opacity:${(.24+i/intensity*.17).toFixed(2)}"/>`}).join(''):'';}
 }
-// Pressure relief valve: starts venting above 15 kg/cm², intensifies to 18.
-if(placed.has('boiler')&&!lost&&pressure>15){
- const intensity=Math.max(0,Math.min(1,(pressure-15)/3));
+// Pressure relief valve: starts venting above 14 kg/cm², intensifies to 18.
+if(placed.has('boiler')&&!lost&&pressure>14){
+ const intensity=Math.max(0,Math.min(1,(pressure-14)/4));
  const elapsed=performance.now()/1000;
  const vx=784,vy=337;
  const count=Math.round(8+37*intensity);
@@ -840,7 +840,11 @@ function tick(){
      // Once boiling, pressure determines saturation temperature.
      // At operating conditions medium firing holds 12 kg/cm²; slow drops, fast rises.
      const change={stopped:-.065,slow:-.030,medium:steamCircuit?(WORK_PRESSURE_BAR-pressure)*.025:.032,fast:normalOperation?.048:.075}[stokerTempo];
-     pressure=Math.max(0,Math.min(EXPLOSION_PRESSURE_BAR+.5,pressure+change));
+     // When the safety valve is venting above 14 kg/cm², its steam discharge
+     // reduces the positive pressure rise by approximately 25%. Cooling and
+     // falling pressure are not slowed down by the relief valve.
+     const reliefAdjustedChange=change>0&&pressure>=14?change*.75:change;
+     pressure=Math.max(0,Math.min(EXPLOSION_PRESSURE_BAR+.5,pressure+reliefAdjustedChange));
    }
  }else{
    pressure=Math.max(0,pressure-.04);
@@ -1101,7 +1105,7 @@ const steamAudio=(()=>{
    }else nextCrackle=t;
    // Kenmerkend suizen van stromend water, uitsluitend bij positief pompdebiet.
    gainTo(pumpGain,pumpOn?(.016+clamp(flow/220,0,1)*.065):0,t,.09);
-   const reliefIntensity=(!lost&&placed.has('boiler'))?Math.max(0,Math.min(1,(pressure-15)/3)):0;
+   const reliefIntensity=(!lost&&placed.has('boiler'))?Math.max(0,Math.min(1,(pressure-14)/4)):0;
    gainTo(reliefGain,reliefIntensity>0?.10+reliefIntensity*.25:0,t,.13);
    const alarm=!lost&&placed.has('boiler')&&level<=20;
    gainTo(whistleGain,alarm?.15:0,t,.06);
@@ -1198,7 +1202,7 @@ setInterval(()=>steamAudio.update(),45);
 <img id="aboutTuutorialLogo" alt="Tuutorial logo">
 <h2 id="aboutTuutorialTitle">Over de Tuutorial</h2>
 <p id="aboutTuutorialPurpose">De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.</p>
-<p id="aboutTuutorialVersion">Versie 149 · Release: 19 november 2026</p>
+<p id="aboutTuutorialVersion">Versie 150 · Release: 19 november 2026</p>
 <p id="aboutTuutorialCopyright">© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.</p>
 </div></div><script>
 (function(){
@@ -1208,12 +1212,12 @@ const close=document.getElementById('aboutTuutorialClose');
 if(!dialog||!logo||!close)return;
 document.getElementById('aboutTuutorialLogo').src=logo.src;
 const copy={
-nl:['Over de Tuutorial','De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.','Versie 149 · Release: 19 november 2026','© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.','Sluiten'],
-en:['About Tuutorial','Tuutorial is intended for educational and demonstration purposes for Stoomgemaal de Tuut in Appeltern. The simulator was conceived and developed by Ruben C.J. Smit in 2026 with the help of all the volunteers at De Tuut.','Version 149 · Released: 19 November 2026','© 2026 Monumentenstichting Baet & Borgh. All rights reserved.','Close'],
-de:['Über Tuutorial','Tuutorial dient Bildungs- und Demonstrationszwecken für das Dampfschöpfwerk De Tuut in Appeltern. Der Simulator wurde 2026 von Ruben C.J. Smit mit Unterstützung aller ehrenamtlichen Helfer von De Tuut konzipiert und entwickelt.','Version 149 · Veröffentlichung: 19. November 2026','© 2026 Monumentenstichting Baet & Borgh. Alle Rechte vorbehalten.','Schließen'],
-fr:['À propos de Tuutorial','Tuutorial est destiné à des fins pédagogiques et de démonstration pour la station de pompage à vapeur De Tuut à Appeltern. Le simulateur a été imaginé et développé par Ruben C.J. Smit en 2026 avec l’aide de tous les bénévoles de De Tuut.','Version 149 · Date de sortie : 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tous droits réservés.','Fermer'],
-it:['Informazioni su Tuutorial','Tuutorial è destinato a scopi didattici e dimostrativi per l’impianto di pompaggio a vapore De Tuut ad Appeltern. Il simulatore è stato ideato e sviluppato da Ruben C.J. Smit nel 2026 con l’aiuto di tutti i volontari di De Tuut.','Versione 149 · Pubblicazione: 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tutti i diritti riservati.','Chiudi'],
-es:['Acerca de Tuutorial','Tuutorial está destinado a fines educativos y de demostración para la estación de bombeo de vapor De Tuut en Appeltern. El simulador fue concebido y desarrollado por Ruben C.J. Smit en 2026 con la ayuda de todos los voluntarios de De Tuut.','Versión 149 · Lanzamiento: 19 de noviembre de 2026','© 2026 Monumentenstichting Baet & Borgh. Todos los derechos reservados.','Cerrar']
+nl:['Over de Tuutorial','De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.','Versie 150 · Release: 19 november 2026','© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.','Sluiten'],
+en:['About Tuutorial','Tuutorial is intended for educational and demonstration purposes for Stoomgemaal de Tuut in Appeltern. The simulator was conceived and developed by Ruben C.J. Smit in 2026 with the help of all the volunteers at De Tuut.','Version 150 · Released: 19 November 2026','© 2026 Monumentenstichting Baet & Borgh. All rights reserved.','Close'],
+de:['Über Tuutorial','Tuutorial dient Bildungs- und Demonstrationszwecken für das Dampfschöpfwerk De Tuut in Appeltern. Der Simulator wurde 2026 von Ruben C.J. Smit mit Unterstützung aller ehrenamtlichen Helfer von De Tuut konzipiert und entwickelt.','Version 150 · Veröffentlichung: 19. November 2026','© 2026 Monumentenstichting Baet & Borgh. Alle Rechte vorbehalten.','Schließen'],
+fr:['À propos de Tuutorial','Tuutorial est destiné à des fins pédagogiques et de démonstration pour la station de pompage à vapeur De Tuut à Appeltern. Le simulateur a été imaginé et développé par Ruben C.J. Smit en 2026 avec l’aide de tous les bénévoles de De Tuut.','Version 150 · Date de sortie : 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tous droits réservés.','Fermer'],
+it:['Informazioni su Tuutorial','Tuutorial è destinato a scopi didattici e dimostrativi per l’impianto di pompaggio a vapore De Tuut ad Appeltern. Il simulatore è stato ideato e sviluppato da Ruben C.J. Smit nel 2026 con l’aiuto di tutti i volontari di De Tuut.','Versione 150 · Pubblicazione: 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tutti i diritti riservati.','Chiudi'],
+es:['Acerca de Tuutorial','Tuutorial está destinado a fines educativos y de demostración para la estación de bombeo de vapor De Tuut en Appeltern. El simulador fue concebido y desarrollado por Ruben C.J. Smit en 2026 con la ayuda de todos los voluntarios de De Tuut.','Versión 150 · Lanzamiento: 19 de noviembre de 2026','© 2026 Monumentenstichting Baet & Borgh. Todos los derechos reservados.','Cerrar']
 };
 function update(){const lang=window.getSimulatorLanguage?.()||'nl';const a=copy[lang]||copy.nl;
 ['aboutTuutorialTitle','aboutTuutorialPurpose','aboutTuutorialVersion','aboutTuutorialCopyright'].forEach((id,i)=>document.getElementById(id).textContent=a[i]);
