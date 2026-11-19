@@ -380,7 +380,7 @@ let placed=new Set(),wired=new Set(),selected=null,ctl={},temp=20,pressure=0,lev
 // De twee optimumwaarden worden onafhankelijk geloot per spelmodus.
 const pickOptimum=values=>values[Math.floor(Math.random()*values.length)];
 const normalOptima=[1.98,2.00,2.02];
-const expertOptima=[1.90,1.95,2.00,2.05,2.10];
+const expertOptima=[1.80,1.90,2.00,2.10,2.20];
 // The pressure gauge shows kg/cm², while internal pressure is stored in bar.
 const EXPERT_MAIN_STEAM_MIN_BAR=6/1.019716213;
 function expertMainSteamLocked(){return gameMode===2&&pressure<=EXPERT_MAIN_STEAM_MIN_BAR;}
@@ -1012,7 +1012,7 @@ function tick(){
      temp=Math.min(100,Math.max(20,temp+heat));
    }else{
      // Once boiling, pressure determines saturation temperature.
-     // Normal: 1.98/2.00/2.02 per game; expert: 1.90/1.95/2.00/2.05/2.10 every 30 s.
+     // Normal: 1.98/2.00/2.02 per game; expert: 1.80/1.90/2.00/2.10/2.20 every 30 s.
      const change={stopped:-.065,slow:-.030,medium:normalOperation?(2-stokerOptimum)*.07:(steamCircuit?(WORK_PRESSURE_BAR-pressure)*.025:.032),fast:normalOperation?.048:.075}[stokerTempo];
      // When the safety valve is venting above 14 kg/cm², its steam discharge
      // reduces the positive pressure rise by approximately 25%. Cooling and
@@ -1376,7 +1376,7 @@ setInterval(()=>steamAudio.update(),45);
 <img id="aboutTuutorialLogo" alt="Tuutorial logo">
 <h2 id="aboutTuutorialTitle">Over de Tuutorial</h2>
 <p id="aboutTuutorialPurpose">De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.</p>
-<p id="aboutTuutorialVersion">Versie 165 · Release: 19 november 2026</p>
+<p id="aboutTuutorialVersion">Versie 166 · Release: 19 november 2026</p>
 <p id="aboutTuutorialCopyright">© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.</p>
 </div></div><script>
 (function(){
@@ -1386,12 +1386,12 @@ const close=document.getElementById('aboutTuutorialClose');
 if(!dialog||!logo||!close)return;
 document.getElementById('aboutTuutorialLogo').src=logo.src;
 const copy={
-nl:['Over de Tuutorial','De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.','Versie 165 · Release: 19 november 2026','© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.','Sluiten'],
-en:['About Tuutorial','Tuutorial is intended for educational and demonstration purposes for Stoomgemaal de Tuut in Appeltern. The simulator was conceived and developed by Ruben C.J. Smit in 2026 with the help of all the volunteers at De Tuut.','Version 165 · Released: 19 November 2026','© 2026 Monumentenstichting Baet & Borgh. All rights reserved.','Close'],
-de:['Über Tuutorial','Tuutorial dient Bildungs- und Demonstrationszwecken für das Dampfschöpfwerk De Tuut in Appeltern. Der Simulator wurde 2026 von Ruben C.J. Smit mit Unterstützung aller ehrenamtlichen Helfer von De Tuut konzipiert und entwickelt.','Version 165 · Veröffentlichung: 19. November 2026','© 2026 Monumentenstichting Baet & Borgh. Alle Rechte vorbehalten.','Schließen'],
-fr:['À propos de Tuutorial','Tuutorial est destiné à des fins pédagogiques et de démonstration pour la station de pompage à vapeur De Tuut à Appeltern. Le simulateur a été imaginé et développé par Ruben C.J. Smit en 2026 avec l’aide de tous les bénévoles de De Tuut.','Version 165 · Date de sortie : 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tous droits réservés.','Fermer'],
-it:['Informazioni su Tuutorial','Tuutorial è destinato a scopi didattici e dimostrativi per l’impianto di pompaggio a vapore De Tuut ad Appeltern. Il simulatore è stato ideato e sviluppato da Ruben C.J. Smit nel 2026 con l’aiuto di tutti i volontari di De Tuut.','Versione 165 · Pubblicazione: 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tutti i diritti riservati.','Chiudi'],
-es:['Acerca de Tuutorial','Tuutorial está destinado a fines educativos y de demostración para la estación de bombeo de vapor De Tuut en Appeltern. El simulador fue concebido y desarrollado por Ruben C.J. Smit en 2026 con la ayuda de todos los voluntarios de De Tuut.','Versión 165 · Lanzamiento: 19 de noviembre de 2026','© 2026 Monumentenstichting Baet & Borgh. Todos los derechos reservados.','Cerrar']
+nl:['Over de Tuutorial','De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.','Versie 166 · Release: 19 november 2026','© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.','Sluiten'],
+en:['About Tuutorial','Tuutorial is intended for educational and demonstration purposes for Stoomgemaal de Tuut in Appeltern. The simulator was conceived and developed by Ruben C.J. Smit in 2026 with the help of all the volunteers at De Tuut.','Version 166 · Released: 19 November 2026','© 2026 Monumentenstichting Baet & Borgh. All rights reserved.','Close'],
+de:['Über Tuutorial','Tuutorial dient Bildungs- und Demonstrationszwecken für das Dampfschöpfwerk De Tuut in Appeltern. Der Simulator wurde 2026 von Ruben C.J. Smit mit Unterstützung aller ehrenamtlichen Helfer von De Tuut konzipiert und entwickelt.','Version 166 · Veröffentlichung: 19. November 2026','© 2026 Monumentenstichting Baet & Borgh. Alle Rechte vorbehalten.','Schließen'],
+fr:['À propos de Tuutorial','Tuutorial est destiné à des fins pédagogiques et de démonstration pour la station de pompage à vapeur De Tuut à Appeltern. Le simulateur a été imaginé et développé par Ruben C.J. Smit en 2026 avec l’aide de tous les bénévoles de De Tuut.','Version 166 · Date de sortie : 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tous droits réservés.','Fermer'],
+it:['Informazioni su Tuutorial','Tuutorial è destinato a scopi didattici e dimostrativi per l’impianto di pompaggio a vapore De Tuut ad Appeltern. Il simulatore è stato ideato e sviluppato da Ruben C.J. Smit nel 2026 con l’aiuto di tutti i volontari di De Tuut.','Versione 166 · Pubblicazione: 19 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tutti i diritti riservati.','Chiudi'],
+es:['Acerca de Tuutorial','Tuutorial está destinado a fines educativos y de demostración para la estación de bombeo de vapor De Tuut en Appeltern. El simulador fue concebido y desarrollado por Ruben C.J. Smit en 2026 con la ayuda de todos los voluntarios de De Tuut.','Versión 166 · Lanzamiento: 19 de noviembre de 2026','© 2026 Monumentenstichting Baet & Borgh. Todos los derechos reservados.','Cerrar']
 };
 function update(){const lang=window.getSimulatorLanguage?.()||'nl';const a=copy[lang]||copy.nl;
 ['aboutTuutorialTitle','aboutTuutorialPurpose','aboutTuutorialVersion','aboutTuutorialCopyright'].forEach((id,i)=>document.getElementById(id).textContent=a[i]);
