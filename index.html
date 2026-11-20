@@ -348,7 +348,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
      behind the centrifugal-pump illustration, without a line cutting through its
      semi-transparent unplaced contour. -->
 <rect fill="#242c2d" height="590" rx="6" width="605" x="0" y="30"></rect>
-<path d="M6 30 H599 Q605 30 605 36 V252 M605 302 V614 Q605 620 599 620 H6 Q0 620 0 614 V36 Q0 30 6 30" fill="none" stroke="#6a7776" stroke-width="3"/>
+<path d="M6 30 H599 Q605 30 605 36 V614 Q605 620 599 620 H6 Q0 620 0 614 V36 Q0 30 6 30" fill="none" stroke="#6a7776" stroke-width="3"/>
 <rect fill="#2b2926" height="590" rx="6" stroke="#8b7770" stroke-width="3" width="305" x="625" y="30"></rect>
 <text fill="#f5a126" font-size="25" font-weight="bold" x="18" y="64">MACHINEKAMER</text>
 <text fill="#f5a126" font-size="25" font-weight="bold" x="646" y="64">KETELHUIS</text>
@@ -381,7 +381,7 @@ const $=id=>document.getElementById(id);
 const saturationTable=[[1.0,99.63],[1.01325,100],[1.5,111.37],[2,120.21],[3,133.53],[4,143.61],[5,151.83],[6,158.83],[7,164.95],[8,170.41],[9,175.36],[10,179.88],[11,184.06],[12,187.96],[13,191.60],[14,195.04],[15,198.28],[16,201.37],[17,204.30],[18,207.11]];
 function saturationTemperature(gaugeBar){const absolute=gaugeBar+1.01325;for(let i=1;i<saturationTable.length;i++){const [p,t]=saturationTable[i],[p0,t0]=saturationTable[i-1];if(absolute<=p)return t0+(t-t0)*(absolute-p0)/(p-p0)}return saturationTable.at(-1)[1]}
 
-const items=[{id:'boiler',name:'Stoomketel',desc:'Ketel met twee vuurgangen',x:800,y:445},{id:'super',name:'Oververhitter',desc:'Verhit verzadigde stoom',x:800,y:185},{id:'engine',name:'Stoommachine + vliegwiel',desc:'Zichtbare zuigerstang, scharnierende drijfstang, krukpen en krukas',x:145,y:290},{id:'plunger',name:'Plunjerpomp',desc:'Voedingswater naar de ketel',x:365,y:290},{id:'centrifugal',name:'Centrifugaalpomp',desc:'Nieuwe Wetering → Maas',x:535,y:297},{id:'condenser',name:'Condensor + natte-luchtpomp',desc:'Uitgewerkte stoom in, weeswater naar de Wetering',x:95,y:515},{id:'chimney',name:'Schoorsteen',desc:'Afvoer van rookgassen',x:1000,y:415}];
+const items=[{id:'boiler',name:'Stoomketel',desc:'Ketel met twee vuurgangen',x:800,y:445},{id:'super',name:'Oververhitter',desc:'Verhit verzadigde stoom',x:800,y:185},{id:'engine',name:'Stoommachine + vliegwiel',desc:'Zichtbare zuigerstang, scharnierende drijfstang, krukpen en krukas',x:145,y:330},{id:'plunger',name:'Plunjerpomp',desc:'Voedingswater naar de ketel',x:357,y:330},{id:'centrifugal',name:'Centrifugaalpomp',desc:'Nieuwe Wetering → Maas',x:495,y:334.3},{id:'condenser',name:'Condensor + natte-luchtpomp',desc:'Uitgewerkte stoom in, weeswater naar de Wetering',x:95,y:515},{id:'chimney',name:'Schoorsteen',desc:'Afvoer van rookgassen',x:1000,y:415}];
 const pos=Object.fromEntries(items.map(i=>[i.id,[i.x,i.y]]));pos.wetering=[470,715];pos.maas=[1120,605];
 const bundles=[{id:'water',name:'Water',desc:'Aanvoer, ketelvoeding, afvoer en weeswater',ids:['intake1','intake2','feed','out','wees']},{id:'steam',name:'Stoom',desc:'Verzadigde, oververhitte en uitgewerkte stoom',ids:['sat','hot','exhaust']},{id:'flue',name:'Rookgassen',desc:'Rookgassen van ketel naar schoorsteen en oververhitter',ids:['flueStack','flueSuper']},{id:'drive',name:'Mechanisch',desc:'Krukas, plunjerpomp en centrifugaalpomp',ids:['shaft1','shaft2']}];
 const links=[['sat','Ketel → oververhitter','boiler','super','steam'],['hot','Oververhitter → machine','super','engine','hot'],['shaft1','Machine → plunjerpomp','engine','plunger','drive'],['shaft2','Plunjerpomp → centrifugaalpomp','plunger','centrifugal','drive'],['intake1','Wetering → plunjerpomp','wetering','plunger','water'],['feed','Plunjerpomp → ketel','plunger','boiler','water'],['intake2','Wetering → centrifugaalpomp','wetering','centrifugal','water'],['out','Centrifugaalpomp → Maas','centrifugal','maas','water'],['exhaust','Cilinder → condensor','engine','condenser','exhaust'],['wees','Condensor/natte-luchtpomp → Wetering','condenser','wetering','water'],['flueStack','Ketel → schoorsteen','boiler','chimney','flue'],['flueSuper','Ketel → oververhitter','boiler','super','flue']];
@@ -457,14 +457,14 @@ const formatNL=(value,decimals=0)=>Number(value).toLocaleString('nl-NL',{minimum
 function log(t){if(t&&$('statusNotice')){$('statusNotice').textContent=t;}}function has(...a){return a.every(x=>placed.has(x))}function connected(...a){return a.every(x=>wired.has(x))}function iso(x,y,w=75,h=35){return `${x},${y-h} ${x+w},${y} ${x},${y+h} ${x-w},${y}`}
 function pathFor(l){const routes={
  sat:'M814 333 V166',
- hot:'M800 143 H66 V225 M66 143 H126 V225',
- shaft1:'M202 248 H365',
- shaft2:'M365 248 H489',
- intake1:'M365 674 V290',
- feed:'M365 203 V181 H690 V383 H722',
- intake2:'M535 674 V297',
- out:'M607 301 V615 H1064',
- exhaust:'M95 248 V447',
+ hot:'M800 143 H66 V265 M66 143 H126 V265',
+ shaft1:'M202 288 H357',
+ shaft2:'M357 288 H493.3',
+ intake1:'M357 674 V330',
+ feed:'M357 243 V205 H722 V395',
+ intake2:'M495 674 V334.3',
+ out:'M567 338.3 V615 H1064',
+ exhaust:'M95 288 V447',
  wees:'M95 515 V674',
  flueStack:'M878 406 H973',
  flueSuper:'M878 406 H920 V143 H862',
@@ -512,10 +512,10 @@ if(placed.has('super')){
 $('equipmentLabels').innerHTML=items.map(i=>`<text class="equipment-label ${placed.has(i.id)?'installed':''}" x="${i.x}" y="${i.y+({boiler:15,super:-4,engine:32,plunger:6,centrifugal:24,condenser:27,chimney:22}[i.id]??20)}">${i.id==='condenser'?`<tspan x="${i.x}" dy="0">Condensor +</tspan><tspan x="${i.x}" dy="14">natte-luchtpomp</tspan>`:i.id==='engine'?'Stoommachine + vliegwiel':i.name}</text>`).join('');
 if(connected('shaft1','shaft2')){
   // Mechanical drive from flywheel to the plunger and centrifugal pumps.
-  $('machines').insertAdjacentHTML('afterbegin','<path d="M202 248 H535" stroke="#865128" stroke-width="11" stroke-linecap="butt" fill="none" pointer-events="none"/>');
+  $('machines').insertAdjacentHTML('afterbegin','<path d="M202 288 H493.3" stroke="#865128" stroke-width="11" stroke-linecap="butt" fill="none" pointer-events="none"/>');
   // Branch from flywheel vertically down to the vertical centre of the wet-air pump, then one 90-degree bend.
   // It is part of the existing mechanical connection group, not an extra switch.
-  if(has('engine','condenser'))$('machines').insertAdjacentHTML('afterbegin','<path d="M202 248 V515 H95" stroke="#865128" stroke-width="7" stroke-linejoin="miter" stroke-linecap="butt" fill="none" pointer-events="none"/>');
+  if(has('engine','condenser'))$('machines').insertAdjacentHTML('afterbegin','<path d="M202 288 V515 H95" stroke="#865128" stroke-width="7" stroke-linejoin="miter" stroke-linecap="butt" fill="none" pointer-events="none"/>');
 }
 $('parts').innerHTML=items.map(i=>`<button class="part ${placed.has(i.id)?'placed':''} ${selected===i.id?'active':''}" data-part="${i.id}" title="${placed.has(i.id)?'Klik om dit onderdeel te verwijderen':i.desc}"><svg viewBox="${i.x-125} ${i.y-165} 250 250" preserveAspectRatio="xMidYMid meet">${shapeOf(i.id)}</svg><span class="part-label"><strong>${i.name}</strong></span></button>`).join('');$('connections').innerHTML=bundles.map(b=>`<button class="bundle switch-row ${b.ids.every(id=>wired.has(id))?'on':''}" data-bundle="${b.id}" aria-pressed="${b.ids.every(id=>wired.has(id))}" title="${b.desc}"><span>${b.name}</span><span class="track"></span></button>`).join('');document.querySelectorAll('[data-ctl]').forEach(b=>{const unavailable=b.dataset.ctl==='valve'&&(!has('boiler')||!connected('sat','hot','exhaust')||expertMainSteamLocked());if(unavailable)ctl.valve=false;b.disabled=unavailable;b.classList.toggle('on',!!ctl[b.dataset.ctl]);b.setAttribute('aria-pressed',String(!!ctl[b.dataset.ctl]));});$('stokerTempo').disabled=!has('boiler');if(!has('boiler')){stokerTempo='stopped';$('stokerTempo').value='0';updateStokerTempoLabel();}const feedControlReady=has('plunger')&&connected('shaft1','shaft2','intake1','feed')&&rpm>0.1&&!lost;$('feedSetting').disabled=!feedControlReady;if(!feedControlReady&&!has('plunger')){feedSetting=0;$('feedSetting').value='0';updateFeedSettingLabel();}}
 
@@ -781,7 +781,7 @@ if(placed.has('engine')){
   // Correct left-hand slider-crank geometry, matching the supplied uniflow reference.
   // The piston and crosshead move horizontally; only the connecting rod pivots.
   // The connecting rod pivots at BOTH the crosshead and the crank pin.
-  const x=145,y=290,cx=x+57,cy=y-42,r=38,L=100;
+  const x=pos.engine[0],y=pos.engine[1],cx=x+57,cy=y-42,r=38,L=100;
   const crankX=cx+r*Math.cos(phase),crankY=cy+r*Math.sin(phase);
   const sliderX=crankX-Math.sqrt(L*L-(crankY-cy)**2);
   const pistonX=sliderX-12;
@@ -869,7 +869,7 @@ if(placed.has('engine')){
   `;
 }
 
-if(placed.has('plunger')){const px=365,py=290,travel=feedSetting>0&&connected('shaft1','shaft2')&&rpm>0?12*Math.cos(phase):0;$('plungerMotion').innerHTML=`<rect x="${px-15}" y="${py-77}" width="30" height="13" rx="2" fill="#f6bf66" stroke="#744823" stroke-width="2"/><line x1="${px}" y1="${py-64}" x2="${px}" y2="${py-43+travel}" stroke="#e6d9ba" stroke-width="7"/><rect x="${px-19}" y="${py-43+travel}" width="38" height="12" rx="3" fill="#e8b05a" stroke="#795328" stroke-width="2"/>`;}
+if(placed.has('plunger')){const px=pos.plunger[0],py=pos.plunger[1],travel=feedSetting>0&&connected('shaft1','shaft2')&&rpm>0?12*Math.cos(phase):0;$('plungerMotion').innerHTML=`<rect x="${px-15}" y="${py-77}" width="30" height="13" rx="2" fill="#f6bf66" stroke="#744823" stroke-width="2"/><line x1="${px}" y1="${py-64}" x2="${px}" y2="${py-43+travel}" stroke="#e6d9ba" stroke-width="7"/><rect x="${px-19}" y="${py-43+travel}" width="38" height="12" rx="3" fill="#e8b05a" stroke="#795328" stroke-width="2"/>`;}
 if(placed.has('condenser')&&$('wetMotion')){
   // De natte-luchtpomp heeft een verticale slag, in fase met de zichtbare krukas.
   // Alleen actief bij draaiende stoommachine én aangesloten mechanische aandrijving.
@@ -877,10 +877,8 @@ if(placed.has('condenser')&&$('wetMotion')){
   const stroke=wetRunning?7*Math.cos(phase):0;
   $('wetMotion').innerHTML=`<line x1="95" y1="486" x2="95" y2="${508+stroke}" stroke="#d6e4df" stroke-width="5" stroke-linecap="round"/><rect x="78" y="${505+stroke}" width="34" height="9" rx="3" fill="#d4b16e" stroke="#654d39" stroke-width="2"/>`;
 }if(placed.has('centrifugal')){
- // The embedded image is 1105x710 and is displayed at x=481,y=195,w=152,h=106.
- // Its actual black opening is centered at image pixel (380, 373), NOT at the
- // equipment anchor or the former hard-coded (555,86) location.
- const x=533.3,y=250.7;
+ // Match the rotor to the exact center of the centrifugal-pump image and clip path.
+ const x=pos.centrifugal[0]-1.7,y=pos.centrifugal[1]-46.3;
  const impellerAngle=connected('shaft1','shaft2')?phase:impellerStoppedPhase;
  // The opening in the PNG is transparent: show the diagram background when idle,
  // and Wetering/Maas blue water only while the pump is actually pumping.
@@ -1385,7 +1383,7 @@ setInterval(()=>steamAudio.update(),45);
 <img id="aboutTuutorialLogo" alt="Tuutorial logo">
 <h2 id="aboutTuutorialTitle">Over de Tuutorial</h2>
 <p id="aboutTuutorialPurpose">De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.</p>
-<p id="aboutTuutorialVersion">Versie 171 · Release: 20 november 2026</p>
+<p id="aboutTuutorialVersion">Versie 177 · Release: 20 november 2026</p>
 <p id="aboutTuutorialCopyright">© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.</p>
 </div></div><script>
 (function(){
@@ -1395,12 +1393,12 @@ const close=document.getElementById('aboutTuutorialClose');
 if(!dialog||!logo||!close)return;
 document.getElementById('aboutTuutorialLogo').src=logo.src;
 const copy={
-nl:['Over de Tuutorial','De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.','Versie 171 · Release: 20 november 2026','© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.','Sluiten'],
-en:['About Tuutorial','Tuutorial is intended for educational and demonstration purposes for Stoomgemaal de Tuut in Appeltern. The simulator was conceived and developed by Ruben C.J. Smit in 2026 with the help of all the volunteers at De Tuut.','Version 171 · Released: 20 November 2026','© 2026 Monumentenstichting Baet & Borgh. All rights reserved.','Close'],
-de:['Über Tuutorial','Tuutorial dient Bildungs- und Demonstrationszwecken für das Dampfschöpfwerk De Tuut in Appeltern. Der Simulator wurde 2026 von Ruben C.J. Smit mit Unterstützung aller ehrenamtlichen Helfer von De Tuut konzipiert und entwickelt.','Version 171 · Veröffentlichung: 20. November 2026','© 2026 Monumentenstichting Baet & Borgh. Alle Rechte vorbehalten.','Schließen'],
-fr:['À propos de Tuutorial','Tuutorial est destiné à des fins pédagogiques et de démonstration pour la station de pompage à vapeur De Tuut à Appeltern. Le simulateur a été imaginé et développé par Ruben C.J. Smit en 2026 avec l’aide de tous les bénévoles de De Tuut.','Version 171 · Date de sortie : 20 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tous droits réservés.','Fermer'],
-it:['Informazioni su Tuutorial','Tuutorial è destinato a scopi didattici e dimostrativi per l’impianto di pompaggio a vapore De Tuut ad Appeltern. Il simulatore è stato ideato e sviluppato da Ruben C.J. Smit nel 2026 con l’aiuto di tutti i volontari di De Tuut.','Versione 171 · Pubblicazione: 20 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tutti i diritti riservati.','Chiudi'],
-es:['Acerca de Tuutorial','Tuutorial está destinado a fines educativos y de demostración para la estación de bombeo de vapor De Tuut en Appeltern. El simulador fue concebido y desarrollado por Ruben C.J. Smit en 2026 con la ayuda de todos los voluntarios de De Tuut.','Versión 171 · Lanzamiento: 20 de noviembre de 2026','© 2026 Monumentenstichting Baet & Borgh. Todos los derechos reservados.','Cerrar']
+nl:['Over de Tuutorial','De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.','Versie 177 · Release: 20 november 2026','© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.','Sluiten'],
+en:['About Tuutorial','Tuutorial is intended for educational and demonstration purposes for Stoomgemaal de Tuut in Appeltern. The simulator was conceived and developed by Ruben C.J. Smit in 2026 with the help of all the volunteers at De Tuut.','Version 177 · Released: 20 November 2026','© 2026 Monumentenstichting Baet & Borgh. All rights reserved.','Close'],
+de:['Über Tuutorial','Tuutorial dient Bildungs- und Demonstrationszwecken für das Dampfschöpfwerk De Tuut in Appeltern. Der Simulator wurde 2026 von Ruben C.J. Smit mit Unterstützung aller ehrenamtlichen Helfer von De Tuut konzipiert und entwickelt.','Version 177 · Veröffentlichung: 20. November 2026','© 2026 Monumentenstichting Baet & Borgh. Alle Rechte vorbehalten.','Schließen'],
+fr:['À propos de Tuutorial','Tuutorial est destiné à des fins pédagogiques et de démonstration pour la station de pompage à vapeur De Tuut à Appeltern. Le simulateur a été imaginé et développé par Ruben C.J. Smit en 2026 avec l’aide de tous les bénévoles de De Tuut.','Version 177 · Date de sortie : 20 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tous droits réservés.','Fermer'],
+it:['Informazioni su Tuutorial','Tuutorial è destinato a scopi didattici e dimostrativi per l’impianto di pompaggio a vapore De Tuut ad Appeltern. Il simulatore è stato ideato e sviluppato da Ruben C.J. Smit nel 2026 con l’aiuto di tutti i volontari di De Tuut.','Versione 177 · Pubblicazione: 20 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tutti i diritti riservati.','Chiudi'],
+es:['Acerca de Tuutorial','Tuutorial está destinado a fines educativos y de demostración para la estación de bombeo de vapor De Tuut en Appeltern. El simulador fue concebido y desarrollado por Ruben C.J. Smit en 2026 con la ayuda de todos los voluntarios de De Tuut.','Versión 177 · Lanzamiento: 20 de noviembre de 2026','© 2026 Monumentenstichting Baet & Borgh. Todos los derechos reservados.','Cerrar']
 };
 function update(){const lang=window.getSimulatorLanguage?.()||'nl';const a=copy[lang]||copy.nl;
 ['aboutTuutorialTitle','aboutTuutorialPurpose','aboutTuutorialVersion','aboutTuutorialCopyright'].forEach((id,i)=>document.getElementById(id).textContent=a[i]);
