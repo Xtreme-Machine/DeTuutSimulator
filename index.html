@@ -1494,15 +1494,30 @@ const steamAudio=(()=>{
  function reset(){machineWasOn=false;lastStrokeAt=-100;nextStroke=context?context.currentTime:0;nextCrackle=nextStroke;if(context){const t=context.currentTime;gainTo(fireGain,0,t,.01);gainTo(pumpGain,0,t,.01);gainTo(whistleGain,0,t,.01);}}
  return {update,toggle,explosion,reset,storkClatter};
 })();
-const soundButton=document.createElement('button');soundButton.id='soundToggle';soundButton.className='switch-row sound-switch';soundButton.type='button';soundButton.setAttribute('aria-pressed','false');soundButton.innerHTML='<span class="audio-label">Geluid</span><span class="track"></span>';
+const soundButton=document.createElement('button');soundButton.id='soundToggle';soundButton.className='switch-row sound-switch';soundButton.type='button';soundButton.setAttribute('aria-pressed','true');soundButton.classList.add('on');soundButton.innerHTML='<span class="audio-label">Geluid</span><span class="track"></span>';
 const soundHint=document.createElement('p');soundHint.id='soundHint';soundHint.className='audio-note';soundHint.textContent='';
 const dashboardControls=document.getElementById('dashboardControls');dashboardControls.append(soundButton,soundHint);const restartButton=document.getElementById('reset');if(restartButton){dashboardControls.append(restartButton);}const demoModeBox=document.querySelector('.demo-mode-box');if(demoModeBox){const connectionPanel=document.getElementById('connections');if(connectionPanel){connectionPanel.insertAdjacentElement('afterend',demoModeBox);}}
-soundButton.addEventListener('click',e=>{e.stopPropagation();if(!autoSoundStarted){autoSoundStarted=true;steamAudio.toggle(true);}else if(!justAutoStarted){steamAudio.toggle();}justAutoStarted=false;});
-// Browsers require a user gesture to unlock audio. Sound is ON by default and
-// automatically starts on the first click/tap/key press anywhere in the simulator.
-let autoSoundStarted=false,justAutoStarted=false;function autoSoundStart(e){if(autoSoundStarted)return;autoSoundStarted=true;justAutoStarted=!!e.target.closest?.('#soundToggle');steamAudio.toggle(true);}
-document.addEventListener('pointerdown',autoSoundStart,{once:true,capture:true});
-document.addEventListener('keydown',autoSoundStart,{once:true,capture:true});
+// Audio is enabled by default. The browser unlocks Web Audio on the first
+// user gesture; the switch already displays ON before that interaction.
+let autoSoundStarted=false;
+soundButton.addEventListener('click',e=>{
+  e.stopPropagation();
+  if(!autoSoundStarted){
+    // First direct click on the ON switch means the user wants to mute it.
+    autoSoundStarted=true;
+    soundButton.classList.remove('on');
+    soundButton.setAttribute('aria-pressed','false');
+    return;
+  }
+  steamAudio.toggle();
+});
+function autoSoundStart(e){
+  if(autoSoundStarted || e.target.closest?.('#soundToggle'))return;
+  autoSoundStarted=true;
+  steamAudio.toggle(true);
+}
+document.addEventListener('pointerdown',autoSoundStart,{capture:true});
+document.addEventListener('keydown',autoSoundStart,{capture:true});
 setInterval(()=>steamAudio.update(),45);
 
 </script><div id="aboutTuutorial" role="dialog" aria-modal="true" aria-labelledby="aboutTuutorialTitle" aria-hidden="true">
@@ -1511,7 +1526,7 @@ setInterval(()=>steamAudio.update(),45);
 <img id="aboutTuutorialLogo" alt="Tuutorial logo">
 <h2 id="aboutTuutorialTitle">Over de Tuutorial</h2>
 <p id="aboutTuutorialPurpose">De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.</p>
-<p id="aboutTuutorialVersion">Versie 192 · Release: 22 november 2026</p>
+<p id="aboutTuutorialVersion">Versie 193 · Release: 22 november 2026</p>
 <p id="aboutTuutorialCopyright">© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.</p>
 </div></div><script>
 (function(){
@@ -1521,12 +1536,12 @@ const close=document.getElementById('aboutTuutorialClose');
 if(!dialog||!logo||!close)return;
 document.getElementById('aboutTuutorialLogo').src=logo.src;
 const copy={
-nl:['Over de Tuutorial','De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.','Versie 192 · Release: 22 november 2026','© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.','Sluiten'],
-en:['About Tuutorial','Tuutorial is intended for educational and demonstration purposes for Stoomgemaal de Tuut in Appeltern. The simulator was conceived and developed by Ruben C.J. Smit in 2026 with the help of all the volunteers at De Tuut.','Version 192 · Released: 22 November 2026','© 2026 Monumentenstichting Baet & Borgh. All rights reserved.','Close'],
-de:['Über Tuutorial','Tuutorial dient Bildungs- und Demonstrationszwecken für das Dampfschöpfwerk De Tuut in Appeltern. Der Simulator wurde 2026 von Ruben C.J. Smit mit Unterstützung aller ehrenamtlichen Helfer von De Tuut konzipiert und entwickelt.','Version 192 · Veröffentlichung: 22. November 2026','© 2026 Monumentenstichting Baet & Borgh. Alle Rechte vorbehalten.','Schließen'],
-fr:['À propos de Tuutorial','Tuutorial est destiné à des fins pédagogiques et de démonstration pour la station de pompage à vapeur De Tuut à Appeltern. Le simulateur a été imaginé et développé par Ruben C.J. Smit en 2026 avec l’aide de tous les bénévoles de De Tuut.','Version 192 · Date de sortie : 22 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tous droits réservés.','Fermer'],
-it:['Informazioni su Tuutorial','Tuutorial è destinato a scopi didattici e dimostrativi per l’impianto di pompaggio a vapore De Tuut ad Appeltern. Il simulatore è stato ideato e sviluppato da Ruben C.J. Smit nel 2026 con l’aiuto di tutti i volontari di De Tuut.','Versione 192 · Pubblicazione: 22 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tutti i diritti riservati.','Chiudi'],
-es:['Acerca de Tuutorial','Tuutorial está destinado a fines educativos y de demostración para la estación de bombeo de vapor De Tuut en Appeltern. El simulador fue concebido y desarrollado por Ruben C.J. Smit en 2026 con la ayuda de todos los voluntarios de De Tuut.','Versión 192 · Lanzamiento: 22 de noviembre de 2026','© 2026 Monumentenstichting Baet & Borgh. Todos los derechos reservados.','Cerrar']
+nl:['Over de Tuutorial','De Tuutorial is bedoeld voor educatieve en demonstratiedoeleinden ten behoeve van Stoomgemaal de Tuut in Appeltern. De simulator is bedacht en ontwikkeld door Ruben C.J. Smit in 2026 met hulp van alle vrijwilligers van De Tuut.','Versie 193 · Release: 22 november 2026','© 2026 Monumentenstichting Baet & Borgh. Alle rechten voorbehouden.','Sluiten'],
+en:['About Tuutorial','Tuutorial is intended for educational and demonstration purposes for Stoomgemaal de Tuut in Appeltern. The simulator was conceived and developed by Ruben C.J. Smit in 2026 with the help of all the volunteers at De Tuut.','Version 193 · Released: 22 November 2026','© 2026 Monumentenstichting Baet & Borgh. All rights reserved.','Close'],
+de:['Über Tuutorial','Tuutorial dient Bildungs- und Demonstrationszwecken für das Dampfschöpfwerk De Tuut in Appeltern. Der Simulator wurde 2026 von Ruben C.J. Smit mit Unterstützung aller ehrenamtlichen Helfer von De Tuut konzipiert und entwickelt.','Version 193 · Veröffentlichung: 22. November 2026','© 2026 Monumentenstichting Baet & Borgh. Alle Rechte vorbehalten.','Schließen'],
+fr:['À propos de Tuutorial','Tuutorial est destiné à des fins pédagogiques et de démonstration pour la station de pompage à vapeur De Tuut à Appeltern. Le simulateur a été imaginé et développé par Ruben C.J. Smit en 2026 avec l’aide de tous les bénévoles de De Tuut.','Version 193 · Date de sortie : 22 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tous droits réservés.','Fermer'],
+it:['Informazioni su Tuutorial','Tuutorial è destinato a scopi didattici e dimostrativi per l’impianto di pompaggio a vapore De Tuut ad Appeltern. Il simulatore è stato ideato e sviluppato da Ruben C.J. Smit nel 2026 con l’aiuto di tutti i volontari di De Tuut.','Versione 193 · Pubblicazione: 22 novembre 2026','© 2026 Monumentenstichting Baet & Borgh. Tutti i diritti riservati.','Chiudi'],
+es:['Acerca de Tuutorial','Tuutorial está destinado a fines educativos y de demostración para la estación de bombeo de vapor De Tuut en Appeltern. El simulador fue concebido y desarrollado por Ruben C.J. Smit en 2026 con la ayuda de todos los voluntarios de De Tuut.','Versión 193 · Lanzamiento: 22 de noviembre de 2026','© 2026 Monumentenstichting Baet & Borgh. Todos los derechos reservados.','Cerrar']
 };
 function update(){const lang=window.getSimulatorLanguage?.()||'nl';const a=copy[lang]||copy.nl;
 ['aboutTuutorialTitle','aboutTuutorialPurpose','aboutTuutorialVersion','aboutTuutorialCopyright'].forEach((id,i)=>document.getElementById(id).textContent=a[i]);
